@@ -1,0 +1,9 @@
+# Cache que ignorara el controlador de versiones
+
+ApiFlask/
+.env
+
+__pycache__/
+*.py[cod]
+
+.pytest_cache/

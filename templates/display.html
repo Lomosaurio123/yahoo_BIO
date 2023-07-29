@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contenido del CSV</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contenido del CSV</h1>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Adj Close</th>
+            <th>Volume</th>
+        </tr>
+        {% for dato in datos %}
+            <tr>
+                <td>{{ dato['Date'] }}</td>
+                <td>{{ dato['Open'] }}</td>
+                <td>{{ dato['High'] }}</td>
+                <td>{{ dato['Low'] }}</td>
+                <td>{{ dato['Close'] }}</td>
+                <td>{{ dato['Adj_Close'] }}</td>
+                <td>{{ dato['Volume'] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

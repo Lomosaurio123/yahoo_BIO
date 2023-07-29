@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActionTrackr</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+
+    
+</head>
+
+<body>
+    <nav class="navbar" style="background-color: #6d7d89;">
+        <div class="container-fluid d-flex justify-content-between">
+            <a class="navbar-brand" href="/">
+                <img  src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                ActionTrackr
+            </a>
+        </div>
+    </nav>
+    
+
+    <h1 align="center">Consulta Acciones</h1>
+    <form method="POST" action="/">
+    <div class="input-group mb-3">
+        <span class="input-group-text">Nombre de la accion</span>
+        <input type="text" name="stock_symbol" id="stock_symbol" required list="suggests">
+        <button type="button" class="btn btn-danger" id="limpiar">Limpiar</button>
+    </div>
+
+    <div class="input-group">
+        <span class="input-group-text">Fecha inicial</span>
+        <input type="number" name="start_year" aria-label="Año inicial" class="form-control" placeholder="Año inicial" required>
+        <input type="number" name="start_month" aria-label="Mes inicial" class="form-control" placeholder="Mes inicial" required>
+        <input type="number" name="start_day" aria-label="Día inicial" class="form-control" placeholder="Dia inicial" required>
+    </div>
+
+    <div class="input-group">
+        <span class="input-group-text" >Fecha final ‎ ‎</span>
+        <input type="number" name="end_year" aria-label="Año final" class="form-control" placeholder="Año final" required>
+        <input type="number" name="end_month" aria-label="Mes final" class="form-control" placeholder="Mes final" required>
+        <input type="number" name="end_day" aria-label="Día final" class="form-control" placeholder="Dia final" required>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-success btn-sm" value="Enviar petición">Enviar petición</button>
+    </form>
+
+    <script>
+        document.getElementById('limpiar').addEventListener('click', function() {
+            document.getElementById('stock_symbol').value = '';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resultado de la consulta</title>
+</head>
+<body>
+    <h1>Resultado de la consulta</h1>
+    {% for csv_filename in csv_filenames %}
+        <h2>Archivo: {{ csv_filename }}</h2>
+        <form method="get" action="/download">
+            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+            <input type="submit" value="Descargar CSV">
+        </form>
+        <br>
+        <form method="get" action="/display">
+            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+            <input type="submit" value="Ver CSV">
+        </form>
+        <hr>
+    {% endfor %}
+    <form method="get" action="/prices">
+        {% for csv_filename in csv_filenames %}
+        <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+        {% endfor %}
+        <input type="submit" value="Generar precios">
+    </form>
+</body>
+</html>

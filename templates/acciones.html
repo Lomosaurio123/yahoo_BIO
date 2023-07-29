@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Acciones</title>
+</head>
+<body>
+    <h1>Lista de Acciones</h1>
+    <table>
+        <tr>
+            <th>Abreviación</th>
+            <th>Nombre Completo</th>
+        </tr>
+        {% for accion in lista_acciones %}
+        <tr>
+            <td>{{ accion.abreviacion }}</td>
+            <td>{{ accion.nombre_completo }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
