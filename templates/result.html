@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
     <title>Resultado de la consulta</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,21 +21,22 @@
     <h3>Resultado de la consulta</h3>
     {% for csv_filename in csv_filenames %}
         <h5>Archivo: {{ csv_filename }}</h5>
-        <form method="get" action="/download">
-            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
-            <input type="submit" value="Descargar CSV">
-        </form>
         <form method="get" action="/display">
             <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
-            <input type="submit" value="Ver CSV">
+            <button type="submit" value="Ver CSV" class="btn btn-outline-info btn-sm">Ver CSV</button>
         </form>
-        <hr>
+        <form method="get" action="/download">
+            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+            <button type="submit" value="Descargar CSV" class="btn btn-outline-success btn-sm">Descargar CSV</button>
+        </form>
+
+        <hr class="border border-black border-2 opacity-50">
     {% endfor %}
     <form method="get" action="/prices">
         {% for csv_filename in csv_filenames %}
         <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
         {% endfor %}
-        <input type="submit" value="Generar precios">
+        <button type="submit" class="btn btn-outline-warning btn-sm" value="Generar precios">Generar precios</button>
     </form>
 </body>
 </html>

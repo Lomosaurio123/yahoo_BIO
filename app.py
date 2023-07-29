@@ -110,6 +110,7 @@ def download():
 def display():
     csv_filename = request.args.get('csv_filename')
 
+
     if csv_filename and os.path.exists(csv_filename):
         # Leer el contenido del archivo CSV
         datos = []
