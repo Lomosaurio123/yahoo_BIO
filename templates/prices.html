@@ -4,24 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 50%;
-        }
-
         th, td {
             border: 1px solid black;
             padding: 8px;
             text-align: center;
         }
 
-        th {
-            background-color: #f2f2f2;
+        table.table-bordered .color-verde {
+            color: green;
+        }
+
+        table.table-bordered .color-rojo {
+            color: red;
         }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </head>
 <body>
     <nav class="navbar" style="background-color: #6d7d89;">
@@ -32,31 +32,67 @@
             </a>
         </div>
     </nav>
-    <h1>Precios</h1>
-    <table>
-        <tr>
-            <th>Fecha</th>
-            {% for record in data %}
-                <th>{{ record.stock_symbol }}</th>
-            {% endfor %}
-        </tr>
-        {% for i in range(data[0].adj_close_data|length) %}
-            <tr>
-                <td>{{ data[0].adj_close_data[i].date }}</td>
-                {% for record in data %}
-                    <td>{{ record.adj_close_data[i].adj_close }}</td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
+    
     <form id="csvForm" method="post" action="/download_csv">
         {% for record in data %}
             {% for adj_close_data in record.adj_close_data %}
                 <input type="hidden" name="data[]" value="{{ adj_close_data.date }},{{ record.stock_symbol }},{{ adj_close_data.adj_close }}">
             {% endfor %}
         {% endfor %}
-        <input type="submit" value="Generar CSV">
+        <div class="d-flex justify-content-between">
+            <h3>Precios</h3>
+            <input type="submit" class="btn btn-outline-success btn-sm" value="Generar CSV">
+        </div>
+
     </form>
-     
+
+    <div class="container mt-4">
+        <table class="table table-bordered">
+            <tr style="text-align: center;">
+                <th>Fecha</th>
+                {% for record in data %}
+                    <th>{{ record.stock_symbol }}</th>
+                {% endfor %}
+            </tr>
+            {% for i in range(data[0].adj_close_data|length) %}
+            <tr>
+                <td>{{ data[0].adj_close_data[i].date }}</td>
+                {% for record in data %}
+                    <td class="columna-{{ record.stock_symbol }}">{{ record.adj_close_data[i].adj_close }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}        
+        </table>
+    </div>
+    
+    
+    <script>
+        $(document).ready(function() {
+            var columnas = ['Adj_Close'];
+    
+            // Obtener todas las columnas presentes en la tabla
+            $(".table th").each(function() {
+                columnas.push($(this).text());
+            });
+
+            for (var i = 0; i < columnas.length; i++) {
+                var nombreColumna = columnas[i];
+                var numeroCeldas = $(".columna-" + nombreColumna);
+
+                numeroCeldas.each(function(index) {
+                    if (index > 0) {
+                        var numeroActual = parseFloat($(this).text());
+                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
+    
+                        if (numeroActual > numeroAnterior) {
+                            $(this).addClass("color-verde");
+                        } else if (numeroActual < numeroAnterior) {
+                            $(this).addClass("color-rojo");
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

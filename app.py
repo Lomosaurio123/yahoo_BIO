@@ -120,7 +120,7 @@ def display():
                 cleaned_row = clean_keys(row)
                 datos.append(cleaned_row)
 
-        return render_template('display.html', datos=datos)
+        return render_template('display.html', datos=datos,nombre=csv_filename)
     else:
         return "Error: El archivo CSV no existe."
 
@@ -136,6 +136,14 @@ def prices():
 
     return render_template('prices.html', data=all_adj_close_data)
 
+
+@app.route('/rendimientos', methods=['GET'])
+def rendimientos():
+    csv_filenames = request.args.getlist('csv_filename')
+
+
+
+    return render_template('rendimientos.html')
 
 @app.route('/download_csv', methods=['POST'])
 def download_csv():

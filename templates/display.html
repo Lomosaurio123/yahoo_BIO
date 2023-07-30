@@ -4,24 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
+        table.table-bordered .color-verde {
+            color: green;
         }
-
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
+    
+        table.table-bordered .color-rojo {
+            color: red;
         }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <nav class="navbar" style="background-color: #6d7d89;">
@@ -32,28 +26,56 @@
             </a>
         </div>
     </nav>
-    <h3>Contenido del CSV</h3>
-    <table>
-        <tr style="text-align: center;">
-            <th>Date</th>
-            <th>Open</th>
-            <th>High</th>
-            <th>Low</th>
-            <th>Close</th>
-            <th>Adj Close</th>
-            <th>Volume</th>
-        </tr>
-        {% for dato in datos %}
-            <tr>
-                <td>{{ dato['Date'] }}</td>
-                <td>{{ dato['Open'] }}</td>
-                <td>{{ dato['High'] }}</td>
-                <td>{{ dato['Low'] }}</td>
-                <td>{{ dato['Close'] }}</td>
-                <td>{{ dato['Adj_Close'] }}</td>
-                <td>{{ dato['Volume'] }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+
+    <div class="container mt-4">
+        <h3>Contenido del CSV: {{nombre}}</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr style="text-align: center;">
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Adj Close</th>
+                    <th>Volume</th>
+                </tr>
+                {% for dato in datos %}
+                <tr>
+                    <td>{{ dato['Date'] }}</td>
+                    <td class="columna-Open">{{ dato['Open'] }}</td>
+                    <td class="columna-High">{{ dato['High'] }}</td>
+                    <td class="columna-Low">{{ dato['Low'] }}</td>
+                    <td class="columna-Close">{{ dato['Close'] }}</td>
+                    <td class="columna-Adj_Close">{{ dato['Adj_Close'] }}</td>
+                    <td class="columna-Volume">{{ dato['Volume'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            var columnas = ['Open', 'High', 'Low', 'Close', 'Adj_Close', 'Volume'];
+    
+            for (var i = 0; i < columnas.length; i++) {
+                var nombreColumna = columnas[i];
+                var numeroCeldas = $(".columna-" + nombreColumna);
+    
+                numeroCeldas.each(function(index) {
+                    if (index > 0) {
+                        var numeroActual = parseFloat($(this).text());
+                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
+                        
+                        if (numeroActual > numeroAnterior) {
+                            $(this).addClass("color-verde");
+                        } else if (numeroActual < numeroAnterior) {
+                            $(this).addClass("color-rojo");
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
