@@ -6,8 +6,28 @@
     <title>ActionTrackr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-</head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        th, td {
+            border: 5px solid black;
+            padding: 8px;
+            text-align: center;
+        }
 
+        table.table-bordered .color-verde {
+            color: green;
+        }
+
+        table.table-bordered .color-rojo {
+            color: red;
+        }
+
+        th.columna_estadisticas_ancho {
+            width: 170px;
+        }
+
+    </style>
+</head>
 <body>
     <nav class="navbar" style="background-color: #6d7d89;">
         <div class="container-fluid d-flex justify-content-between">
@@ -18,5 +38,165 @@
         </div>
     </nav>
     
+    <form id="csvForm" method="post" action="/download_csv">
+        <input type="hidden" name="nombre_csv" value="Rendimientos.csv">
+        <div class="d-flex justify-content-between">
+            <h3>Rendimientos</h3>
+            <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="generarCSV">
+        </div>
+    </form>
+
+
+    <div class="container mt-4">
+        <table class="table table-bordered" id="accionesTabla">
+            <tr style="text-align: left;">
+                <th class="columna_estadisticas_ancho">No. Acciones</th>
+                {% for record in data %}
+                <th>{{ loop.index }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>Acciones</th>
+                {% for record in data %}
+                    <th>{{ record.stock_symbol }}</th>
+                {% endfor %}
+            </tr>
+        <tr>
+            <th>Rendimiento anual</th>
+
+        </tr>
+            <tr>
+                <th>SD ANUAL</th>
+            </tr>
+            <tr>
+                <th>CV</th>
+            </tr>
+            <tr>
+                <th>Beta</th>
+            </tr>
+            <tr>
+                <th>Sistematico</th>
+            </tr>
+            <tr>
+                <th>No sistematico</th>
+            </tr>
+            <tr>
+                <th>TLR</th>
+            </tr>
+            <tr>
+                <th>SHARPES</th>
+            </tr>
+        </table>
+    </div>
+
+
+
+
+    <div class="container mt-4">
+        <table class="table table-bordered" id="datosTabla">
+            <tr style="text-align: center;">    
+                <th colspan="{{ data|length + 1 }}">Rendimiento diario</th>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                {% for record in data %}
+                    <th>{{ record.stock_symbol }}</th>
+                {% endfor %}
+            </tr>
+            {% for i in range(data[0].adj_close_data|length) %}
+                <tr>
+                    <td>{{ data[0].adj_close_data[i].date }}</td>
+                    {% for j in range(data|length) %}
+                        {% if i == 0 %}
+                            <td class="columna-{{ data[j].stock_symbol }}">0%</td>
+                        {% else %}
+                            {% set previous_close = data[j].adj_close_data[i-1].adj_close %}
+                            {% set current_close = data[j].adj_close_data[i].adj_close %}
+                            {% set result = ((previous_close / current_close) - 1) * 100 %}
+                            <td class="columna-{{ data[j].stock_symbol }}">{{ '%.4f' % result }}%</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}    
+        </table>
+        
+    </div>
+    
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var columnas = ['Adj_Close'];
+
+            // Obtener todas las columnas presentes en la tabla
+            $(".table th").each(function() {
+                columnas.push($(this).text());
+            });
+
+            for (var i = 0; i < columnas.length; i++) {
+                var nombreColumna = columnas[i];
+                var numeroCeldas = $(".columna-" + nombreColumna);
+
+                numeroCeldas.each(function(index) {
+                    if (index > 0) {
+                        var numeroActual = parseFloat($(this).text());
+                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
+
+                        if (numeroActual > numeroAnterior) {
+                            $(this).addClass("color-verde");
+                        } else if (numeroActual < numeroAnterior) {
+                            $(this).addClass("color-rojo");
+                        }
+                    }
+                });
+            };
+        });
+    </script>
+
+    <script>
+    function downloadCSV(csv, filename) {
+        var csvFile;
+        var downloadLink;
+    
+        // Crear el archivo CSV
+        csvFile = new Blob([csv], { type: "text/csv" });
+    
+        // Crear un enlace de descarga
+        downloadLink = document.createElement("a");
+    
+        // Establecer el enlace para el archivo CSV
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+    
+        // Simular el clic para descargar el archivo
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+      }
+    
+      function generateCSV() {
+        // Obtener los datos de la tabla
+        var table = document.getElementById("datosTabla");
+        var rows = table.getElementsByTagName("tr");
+    
+        var csv = "";
+        for (var i = 0; i < rows.length; i++) {
+          var row = [],
+            cols = rows[i].querySelectorAll("td, th");
+    
+          for (var j = 0; j < cols.length; j++) {
+            row.push(cols[j].innerText);
+          }
+    
+          csv += row.join(",") + "\n";
+        }
+    
+        // Descargar el archivo CSV
+        downloadCSV(csv, "Rendimientos.csv");
+      }
+    
+      // Asociar la función de generación de CSV al botón "Generar CSV"
+      document.getElementById("generarCSV").addEventListener("click", generateCSV);
+      </script>
 </body>
 </html>

@@ -127,8 +127,8 @@ def display():
 @app.route('/prices', methods=['GET'])
 def prices():
     csv_filenames = request.args.getlist('csv_filename')
-
     all_adj_close_data = [] 
+
     for csv_filename in csv_filenames:
         if os.path.exists(csv_filename):
             stock_symbol, adj_close_data = get_adj_close(csv_filename)
@@ -140,17 +140,18 @@ def prices():
 @app.route('/rendimientos', methods=['GET'])
 def rendimientos():
     csv_filenames = request.args.getlist('csv_filename')
+    all_adj_close_data = [] 
 
+    for csv_filename in csv_filenames:
+        if os.path.exists(csv_filename):
+            stock_symbol, adj_close_data = get_adj_close(csv_filename)
+            all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
 
+    return render_template('rendimientos.html',data=all_adj_close_data)
 
-    return render_template('rendimientos.html')
-
-@app.route('/download_csv', methods=['POST'])
-def download_csv():
-    data = request.form.getlist('data[]')
-
+def generar_csv(data):
     if not data:
-        return "Error: No data selected for CSV generation."
+        return "Error: No se seleccionaron datos para la generación del CSV."
 
     csv_data = {}
     for item in data:
@@ -171,13 +172,22 @@ def download_csv():
             row_data.append(adj_close_data.get(stock_symbol, ''))
         writer.writerow(row_data)
 
+    return csv_buffer.getvalue()
+
+@app.route('/download_csv', methods=['POST'])
+def download_csv():
+    data = request.form.getlist('data[]')
+    filename = request.form.get('nombre_csv')  # Obtener el nombre del archivo
+    print(filename)
+
+    contenido_csv = generar_csv(data)
+
     # Preparar la respuesta para descargar el archivo CSV
-    response = make_response(csv_buffer.getvalue())
-    response.headers["Content-Disposition"] = "attachment; filename=precios.csv"
+    response = make_response(contenido_csv)
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
     response.headers["Content-type"] = "text/csv"
 
     return response
 
 if __name__ == '__main__':
     app.run(debug=True)
-
