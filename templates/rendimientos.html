@@ -39,10 +39,10 @@
     </nav>
     
     <form id="csvForm" method="post" action="/download_csv">
-        <input type="hidden" name="nombre_csv" value="Rendimientos.csv">
+        <input type="hidden" name="nombre_csv" value="Rendimientos.csv" >
         <div class="d-flex justify-content-between">
             <h3>Rendimientos</h3>
-            <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="generarCSV">
+            <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="GenerarCSV">
         </div>
     </form>
 
@@ -61,9 +61,9 @@
                     <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
-        <tr>
+        <tr id = "RendimientoAnual">
             <th>Rendimiento anual</th>
-
+            
         </tr>
             <tr>
                 <th>SD ANUAL</th>
@@ -120,83 +120,7 @@
             {% endfor %}    
         </table>
         
+        <script src="{{ url_for('serve_script', filename='rendimientos.js') }}"> </script>
     </div>
-    
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            var columnas = ['Adj_Close'];
-
-            // Obtener todas las columnas presentes en la tabla
-            $(".table th").each(function() {
-                columnas.push($(this).text());
-            });
-
-            for (var i = 0; i < columnas.length; i++) {
-                var nombreColumna = columnas[i];
-                var numeroCeldas = $(".columna-" + nombreColumna);
-
-                numeroCeldas.each(function(index) {
-                    if (index > 0) {
-                        var numeroActual = parseFloat($(this).text());
-                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
-
-                        if (numeroActual > numeroAnterior) {
-                            $(this).addClass("color-verde");
-                        } else if (numeroActual < numeroAnterior) {
-                            $(this).addClass("color-rojo");
-                        }
-                    }
-                });
-            };
-        });
-    </script>
-
-    <script>
-    function downloadCSV(csv, filename) {
-        var csvFile;
-        var downloadLink;
-    
-        // Crear el archivo CSV
-        csvFile = new Blob([csv], { type: "text/csv" });
-    
-        // Crear un enlace de descarga
-        downloadLink = document.createElement("a");
-    
-        // Establecer el enlace para el archivo CSV
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-    
-        // Simular el clic para descargar el archivo
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-      }
-    
-      function generateCSV() {
-        // Obtener los datos de la tabla
-        var table = document.getElementById("datosTabla");
-        var rows = table.getElementsByTagName("tr");
-    
-        var csv = "";
-        for (var i = 0; i < rows.length; i++) {
-          var row = [],
-            cols = rows[i].querySelectorAll("td, th");
-    
-          for (var j = 0; j < cols.length; j++) {
-            row.push(cols[j].innerText);
-          }
-    
-          csv += row.join(",") + "\n";
-        }
-    
-        // Descargar el archivo CSV
-        downloadCSV(csv, "Rendimientos.csv");
-      }
-    
-      // Asociar la función de generación de CSV al botón "Generar CSV"
-      document.getElementById("generarCSV").addEventListener("click", generateCSV);
-      </script>
 </body>
 </html>

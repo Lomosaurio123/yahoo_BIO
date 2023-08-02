@@ -1,10 +1,7 @@
 import csv
 import io
-import json
-import tempfile
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
 import datetime
-import yfinance as yf
 import os
 
 from functions import get_stock_history, clean_keys, get_adj_close
@@ -15,6 +12,10 @@ app = Flask(__name__)
 def serve_static(filename):
     root_dir = os.path.dirname(os.getcwd())
     return send_from_directory(os.path.join(root_dir, 'static'), filename)
+
+@app.route('/Scripts/<path:filename>')
+def serve_script(filename):
+    return send_from_directory('Scripts', filename)
 
 @app.route('/get_suggestions', methods=['GET'])
 def get_suggestions():
