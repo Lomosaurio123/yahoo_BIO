@@ -61,18 +61,29 @@
                     <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
-        <tr id = "RendimientoAnual">
+        <tr>
             <th>Rendimiento anual</th>
-            
+            {% for record in data %}
+                    <td>{{ '%.4f' % rendimientos_anuales[record.stock_symbol] }}%</td>
+                {% endfor %}
         </tr>
             <tr>
                 <th>SD ANUAL</th>
+                {% for record in data %}
+                    <td>{{ '%.4f' % desviacion_estandar[record.stock_symbol] }}</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>CV</th>
+                {% for record in data %}
+                    <td>{{ '%.4f' % coeficiente[record.stock_symbol] }}</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>Beta</th>
+                {% for record in data %}
+                    <td>{{ '%.4f' % beta[record.stock_symbol] }}</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>Sistematico</th>
@@ -88,7 +99,6 @@
             </tr>
         </table>
     </div>
-
 
 
 

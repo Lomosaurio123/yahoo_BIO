@@ -72,40 +72,6 @@ function color_data( id_tabla, id_filas ) {
         
 }
 
-function rendimiento_anual( id_tabla, id_filas ) {
-
-    
-    // Obtener los datos de la tabla
-    var table = document.getElementById( id_tabla );
-    var rows = table.getElementsByTagName( id_filas );
-        
-    // Obtener la cantidad de acciones
-    
-    cantidad_acciones = rows[1].querySelectorAll("td, th").length - 1;
-
-    rendimientos = []
-    
-    for( let accion = 1; accion <= cantidad_acciones; accion ++ ) {
-
-        let suma = 0
-    
-        // Evaluar la diferencia de valores por cada acción
-        for ( let i = 2; i < rows.length; i++ ) {
-            
-            let columna = rows[i].querySelectorAll("td, th");
-
-            suma += parseFloat( columna[accion].innerText )
-            
-        }
-
-        rendimientos.push( ( suma / rows.length ) * 252 )
-    
-    }
-
-    return rendimientos
-
-}
-
 
   // Asociar la función de generación de CSV al botón "Generar CSV"
 document.getElementById("GenerarCSV").addEventListener("click", generateCSV);

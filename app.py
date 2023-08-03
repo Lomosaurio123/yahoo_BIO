@@ -1,8 +1,11 @@
 import csv
 import io
+import statistics
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
 import datetime
 import os
+
+import numpy as np
 
 from functions import get_stock_history, clean_keys, get_adj_close
 
@@ -51,7 +54,12 @@ def index():
             int(request.form['end_month']),
             int(request.form['end_day'])
         ]
-        stock_symbols = request.form['stock_symbol'].split(',')
+        stock_symbols = request.form['stock_symbol'].split(',') 
+        stock_symbols.append("^MXX")
+
+        print(stock_symbols)
+
+        
 
         start_date = datetime.datetime(periodo_inicial[0], periodo_inicial[1], periodo_inicial[2])
         end_date = datetime.datetime(periodo_final[0], periodo_final[1], periodo_final[2])
@@ -137,7 +145,6 @@ def prices():
 
     return render_template('prices.html', data=all_adj_close_data)
 
-
 @app.route('/rendimientos', methods=['GET'])
 def rendimientos():
     csv_filenames = request.args.getlist('csv_filename')
@@ -148,7 +155,56 @@ def rendimientos():
             stock_symbol, adj_close_data = get_adj_close(csv_filename)
             all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
 
-    return render_template('rendimientos.html',data=all_adj_close_data)
+    # Calcular los rendimientos diarios y guardarlos en un diccionario
+    rendimientos_diarios = {}
+    for data in all_adj_close_data:
+        stock_symbol = data['stock_symbol']
+        adj_close_data = data['adj_close_data']
+
+        rendimientos_diarios[stock_symbol] = []
+        for i in range(1, len(adj_close_data)):
+            previous_close = adj_close_data[i-1]['adj_close']
+            current_close = adj_close_data[i]['adj_close']
+            result = ((previous_close / current_close) - 1) * 100
+            rendimientos_diarios[stock_symbol].append(result)
+
+
+    # Calcular la desviación estándar de cada acción
+    desviacion_estandar = {}
+    for stock_symbol, rendimientos in rendimientos_diarios.items():
+        desviacion_estandar[stock_symbol] = (np.std(rendimientos) / 100) * (np.sqrt(252))
+
+    # Calcular el rendimiento anual de cada acción
+    rendimientos_anuales = {}
+    for stock_symbol, rendimientos in rendimientos_diarios.items():
+        rendimientos_anuales[stock_symbol] = np.mean(rendimientos) * 252
+
+    Cof_var = {}
+    for stock_symbol, rendimientos in desviacion_estandar.items():
+        Cof_var[stock_symbol] = (rendimientos_anuales[stock_symbol]/100)/desviacion_estandar[stock_symbol]
+
+    
+    # Obtener la lista de rendimientos de la última acción
+    ultima_accion = list(rendimientos_diarios.keys())[-1]
+    rendimientos_ultima_accion = rendimientos_diarios[ultima_accion]
+
+    print(ultima_accion)
+    print(rendimientos_ultima_accion)
+    
+    betas = {}
+    for stock_symbol, rendimientos in rendimientos_diarios.items():
+        if len(rendimientos) != len(rendimientos_ultima_accion):
+            beta = np.polyfit(rendimientos, rendimientos_ultima_accion[:len(rendimientos)], 1)
+            betas[stock_symbol] = beta[0]
+        else:
+            beta = np.polyfit(rendimientos, rendimientos_ultima_accion, 1)
+            betas[stock_symbol] = beta[0]
+
+
+    print(betas)
+
+    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, coeficiente=Cof_var, beta=betas)
+
 
 def generar_csv(data):
     if not data:
