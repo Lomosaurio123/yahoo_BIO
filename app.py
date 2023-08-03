@@ -1,12 +1,10 @@
 import csv
 import io
-import statistics
+import requests
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
 import datetime
 import os
-
 import numpy as np
-
 from functions import get_stock_history, clean_keys, get_adj_close
 
 app = Flask(__name__)
@@ -56,10 +54,6 @@ def index():
         ]
         stock_symbols = request.form['stock_symbol'].split(',') 
         stock_symbols.append("^MXX")
-
-        print(stock_symbols)
-
-        
 
         start_date = datetime.datetime(periodo_inicial[0], periodo_inicial[1], periodo_inicial[2])
         end_date = datetime.datetime(periodo_final[0], periodo_final[1], periodo_final[2])
@@ -187,23 +181,43 @@ def rendimientos():
     # Obtener la lista de rendimientos de la última acción
     ultima_accion = list(rendimientos_diarios.keys())[-1]
     rendimientos_ultima_accion = rendimientos_diarios[ultima_accion]
-
-    print(ultima_accion)
-    print(rendimientos_ultima_accion)
     
+    #Calcular betas, sistematico y no sistematico
     betas = {}
+    sistematico={}
+    no_sistematico={}
+    
+
     for stock_symbol, rendimientos in rendimientos_diarios.items():
         if len(rendimientos) != len(rendimientos_ultima_accion):
             beta = np.polyfit(rendimientos, rendimientos_ultima_accion[:len(rendimientos)], 1)
             betas[stock_symbol] = beta[0]
+            r2 = np.corrcoef(rendimientos, rendimientos_ultima_accion[:len(rendimientos)])[0, 1] ** 2
+            sistematico[stock_symbol] = r2*100
+            no_sistematico[stock_symbol]=(1-r2)*100
         else:
             beta = np.polyfit(rendimientos, rendimientos_ultima_accion, 1)
             betas[stock_symbol] = beta[0]
+            r2 = np.corrcoef(rendimientos, rendimientos_ultima_accion)[0, 1] ** 2
+            sistematico[stock_symbol] = r2*100
+            no_sistematico[stock_symbol]=(1-r2)*100
+            
+    #Obtener TLR de cetes
+    tlr={}
+    url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43945/datos/oportuno?token=095aad77fedb56adf22ea01d8e61808ae121fd87ac7d62c030ca97887d5dd2ad'
 
+    response = requests.get(url)
+    data = response.json()
+    series = data['bmx']['series'][0]['datos']
+    tasa = series[0]['dato'] 
+    #SHARPES
+    sharpes={}
 
-    print(betas)
+    for stock_symbol, rendimientos in rendimientos_diarios.items():
+        tlr[stock_symbol] = float(tasa)
+        sharpes[stock_symbol]=((rendimientos_anuales[stock_symbol]/100)-(tlr[stock_symbol]/100))/desviacion_estandar[stock_symbol]
 
-    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, coeficiente=Cof_var, beta=betas)
+    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
 
 
 def generar_csv(data):
@@ -235,7 +249,6 @@ def generar_csv(data):
 def download_csv():
     data = request.form.getlist('data[]')
     filename = request.form.get('nombre_csv')  # Obtener el nombre del archivo
-    print(filename)
 
     contenido_csv = generar_csv(data)
 

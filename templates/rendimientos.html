@@ -87,15 +87,27 @@
             </tr>
             <tr>
                 <th>Sistematico</th>
+                {% for record in data %}
+                    <td>{{ '%.4f' % sistematico[record.stock_symbol] }}%</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>No sistematico</th>
+                {% for record in data %}
+                <td>{{ '%.4f' % no_sistematico[record.stock_symbol] }}%</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>TLR</th>
+                {% for record in data %}
+                <td>{{ '%.2f' % tlr[record.stock_symbol] }}%</td>
+                {% endfor %}
             </tr>
             <tr>
                 <th>SHARPES</th>
+                {% for record in data %}
+                <td>{{ '%.4f' % sharpes[record.stock_symbol] }}</td>
+                {% endfor %}
             </tr>
         </table>
     </div>
