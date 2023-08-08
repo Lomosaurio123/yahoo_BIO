@@ -1,0 +1,41 @@
+.lado-izq {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100vh; /* Cambio la altura para usar la altura completa del viewport */
+    background-color: #f2f2f2;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+
+.lado-der {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 100vh; /* Cambio la altura para usar la altura completa del viewport */
+    background-color: #f2f2f2;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+
+.lado-izq h1,
+.lado-der h1 {
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+#suggestions {
+    margin-bottom: 15px;
+}
+
+#limpiar {
+    display: block;
+    margin: 0 auto;
+}

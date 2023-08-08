@@ -217,7 +217,8 @@ def rendimientos():
         tlr[stock_symbol] = float(tasa)
         sharpes[stock_symbol]=((rendimientos_anuales[stock_symbol]/100)-(tlr[stock_symbol]/100))/desviacion_estandar[stock_symbol]
 
-    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
+    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, 
+                           coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
 
 
 def generar_csv(data):
