@@ -16,6 +16,21 @@
             }
         }
     </script>
+    <style>
+        .custom-input-group {
+            display: flex;
+            align-items: center;
+        width: 100%;
+        }
+
+    .custom-input-group .input-group-text {
+        min-width: 100px; /* Ajusta este valor según tus preferencias */
+    }
+
+    .custom-input-group .form-control {
+        flex: 1;
+    }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -33,7 +48,7 @@
                 <form method="POST" action="/">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Nombre de la acción</span>
-                        <input type="text" name="stock_symbol" id="stock_symbol" required oninput="getActionSuggestions()" class="form-control form-control-lg">
+                        <input type="text" name="stock_symbol" id="stock_symbol" required oninput="getActionSuggestions()" class="form-control form-control">
                     </div>
                     <button type="button" class="btn btn-danger btn-sm" id="limpiar">Limpiar</button>
                     <div id="suggestions"></div>
@@ -46,7 +61,7 @@
                         <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required>
                     </div>
                     <div class="input-group">
-                        <span class="input-group-text">Fecha final</span>
+                        <span class="input-group-text">Fecha final ‎ ‎ </span>
                         <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required>
                     </div>
                     <br>
