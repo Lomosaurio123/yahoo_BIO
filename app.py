@@ -28,10 +28,10 @@ def get_suggestions():
 
     # Leer el contenido del archivo CSV y filtrar las acciones que coinciden con el texto ingresado
     suggestions = []
-    with open(csv_filename, newline='') as csvfile:
+    with open(csv_filename, newline='',encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            abreviacion = row['ï»¿Abreviacion']
+            abreviacion = row['\ufeffAbreviacion']
             nombre_completo = row['NombreCompleto']
 
             if input_text in abreviacion.lower() or input_text in nombre_completo.lower():
@@ -87,7 +87,7 @@ def acciones():
     csv_filename = 'Lista_acciones.csv'
 
     # Leer y mostrar el contenido del archivo CSV
-    with open(csv_filename, newline='') as csvfile:
+    with open(csv_filename, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             abreviacion = row['ï»¿Abreviacion']

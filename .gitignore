@@ -11,4 +11,5 @@ __pycache__/
 Historial*.csv
 portafolio1anio.xlsm
 tempCodeRunnerFile.py
+eliminar_duplicados.py
 Formateador_acciones.py
