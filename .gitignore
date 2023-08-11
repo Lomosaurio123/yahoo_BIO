@@ -9,5 +9,6 @@ __pycache__/
 .pytest_cache/
 
 Historial*.csv
-
+portafolio1anio.xlsm
 tempCodeRunnerFile.py
+Formateador_acciones.py
