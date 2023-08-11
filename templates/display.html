@@ -27,8 +27,23 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div>
         <h3>Contenido del CSV: {{nombre}}</h3>
+
+        <div>
+            <table class="table table-bordered">
+                <tr style="text-align: center;" >
+                    <th>Máximo:</th>
+                    <td id="maximo-adj-close"></td>
+                    <th>Mínimo:</th>
+                    <td id="minimo-adj-close"></td>
+                    <th>Promedio:</th>
+                    <td id="promedio-adj-close"></td>
+                </tr>
+            </table>
+        </div>
+
+
         <div class="table-responsive">
             <table class="table table-bordered">
                 <tr style="text-align: center;">
@@ -77,5 +92,47 @@
             }
         });
     </script>
+
+<script>
+    $(document).ready(function() {
+        var columnaAnalizada = 'Adj_Close'; // Columna a analizar (Precio de Cierre Ajustado)
+        var valores = {
+            maximo: -Infinity,
+            minimo: Infinity,
+            suma: 0,
+            contador: 0
+        };
+
+        // Recorre las celdas de la columna Adj_Close para calcular los valores
+        $(".columna-" + columnaAnalizada).each(function(index) {
+            var numeroActual = parseFloat($(this).text());
+
+            // Actualiza el valor máximo
+            if (numeroActual > valores.maximo) {
+                valores.maximo = numeroActual;
+            }
+
+            // Actualiza el valor mínimo
+            if (numeroActual < valores.minimo) {
+                valores.minimo = numeroActual;
+            }
+
+            // Actualiza la suma y el contador para el promedio
+            valores.suma += numeroActual;
+            valores.contador++;
+        });
+
+        // Calcula y muestra los valores máximo, mínimo y promedio en la tabla
+        var celdaMaximo = $("<td>").text(valores.maximo.toFixed(2));
+        var celdaMinimo = $("<td>").text(valores.minimo.toFixed(2));
+        var celdaPromedio = $("<td>").text((valores.suma / valores.contador).toFixed(2));
+
+        // Inserta los valores en las celdas correspondientes de la tabla de resumen
+        $("#maximo-adj-close").html(celdaMaximo);
+        $("#minimo-adj-close").html(celdaMinimo);
+        $("#promedio-adj-close").html(celdaPromedio);
+    });
+</script>
+
 </body>
 </html>

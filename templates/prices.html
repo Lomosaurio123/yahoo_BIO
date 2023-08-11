@@ -53,14 +53,14 @@
             <tr>
                 <td>{{ data[0].adj_close_data[i].date }}</td>
                 {% for record in data %}
-                    <td class="columna-{{ record.stock_symbol }}">{{ record.adj_close_data[i].adj_close }}</td>
+                    {% set symbol_id = record.stock_symbol|replace('^', '_') %}
+                    <td class="columna-{{ symbol_id }}">{{ record.adj_close_data[i].adj_close }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}        
         </table>
     </div>
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             var columnas = ['Adj_Close'];
@@ -69,15 +69,17 @@
             $(".table th").each(function() {
                 columnas.push($(this).text());
             });
-
+    
             for (var i = 0; i < columnas.length; i++) {
                 var nombreColumna = columnas[i];
-                var numeroCeldas = $(".columna-" + nombreColumna);
-
+                var symbol_id = nombreColumna.replace('^', '_');
+                var symbol_id_selector = $.escapeSelector(symbol_id); // Escapar el selector
+                var numeroCeldas = $(".columna-" + symbol_id_selector);
+    
                 numeroCeldas.each(function(index) {
                     if (index > 0) {
                         var numeroActual = parseFloat($(this).text());
-                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
+                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + symbol_id_selector).text());
     
                         if (numeroActual > numeroAnterior) {
                             $(this).addClass("color-verde");

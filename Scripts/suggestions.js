@@ -6,6 +6,12 @@ function getActionSuggestions() {
     // Obtenemos el valor ingresado por el usuario en el campo "stock_symbol"
     const inputValue = document.getElementById('stock_symbol').value;
 
+    if (inputValue === '') {
+        // Si está vacío, limpiamos las sugerencias
+        document.getElementById('suggestions').innerHTML = ''; 
+        return; 
+      }
+
     // Verificamos si el valor ingresado contiene una coma
     if (inputValue.includes(',')) {
         const inputParts = inputValue.split(',').map(part => part.trim());

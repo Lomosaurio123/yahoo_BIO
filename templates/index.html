@@ -8,6 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <script src="{{ url_for('serve_script', filename='suggestions.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script>
+        // Función para mostrar el mensaje de error si es necesario
+        function showError(errorMessage) {
+            if (errorMessage) {
+                alert(errorMessage);  // Muestra una alerta simple
+            }
+        }
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -35,20 +43,17 @@
                 <form method="POST" action="/">
                     <div class="input-group">
                         <span class="input-group-text">Fecha inicial</span>
-                        <input type="number" name="start_year" aria-label="Año inicial" class="form-control" placeholder="Año inicial" required>
-                        <input type="number" name="start_month" aria-label="Mes inicial" class="form-control" placeholder="Mes inicial" required>
-                        <input type="number" name="start_day" aria-label="Día inicial" class="form-control" placeholder="Dia inicial" required>
+                        <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required>
                     </div>
                     <div class="input-group">
                         <span class="input-group-text">Fecha final</span>
-                        <input type="number" name="end_year" aria-label="Año final" class="form-control" placeholder="Año final" required>
-                        <input type="number" name="end_month" aria-label="Mes final" class="form-control" placeholder="Mes final" required>
-                        <input type="number" name="end_day" aria-label="Día final" class="form-control" placeholder="Dia final" required>
+                        <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required>
                     </div>
                     <br>
                     <button type="submit" class="btn btn-success btn-sm" value="Enviar petición">Enviar petición</button>
                 </form>
             </div>
+            
         </div>
     </div>
     <script>
@@ -56,6 +61,10 @@
             document.getElementById('stock_symbol').value = '';
             document.getElementById('suggestions').innerHTML = '';
         });
+    </script>
+    <script>
+        // Llama a la función para mostrar el mensaje de error
+        showError("{{ error_message }}");
     </script>
 </body>
 </html>

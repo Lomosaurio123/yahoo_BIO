@@ -2,7 +2,7 @@ import csv
 import io
 import requests
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
-import datetime
+from datetime import datetime
 import os
 import numpy as np
 from functions import get_stock_history, clean_keys, get_adj_close
@@ -42,21 +42,16 @@ def get_suggestions():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        periodo_inicial = [
-            int(request.form['start_year']),
-            int(request.form['start_month']),
-            int(request.form['start_day'])
-        ]
-        periodo_final = [
-            int(request.form['end_year']),
-            int(request.form['end_month']),
-            int(request.form['end_day'])
-        ]
+        # Obtener las fechas directamente como objetos datetime
+        periodo_inicial = datetime.strptime(request.form['start_date'], '%Y-%m-%d')
+        periodo_final = datetime.strptime(request.form['end_date'], '%Y-%m-%d')
+
+        # Validar si la fecha inicial es posterior a la fecha final
+        if periodo_inicial > periodo_final:
+            return render_template('index.html', error_message="La fecha inicial debe ser anterior a la fecha final")
+
         stock_symbols = request.form['stock_symbol'].split(',') 
         stock_symbols.append("^MXX")
-
-        start_date = datetime.datetime(periodo_inicial[0], periodo_inicial[1], periodo_inicial[2])
-        end_date = datetime.datetime(periodo_final[0], periodo_final[1], periodo_final[2])
 
         # Eliminar archivos CSV con nombre que comienza con 'Historial_'
         csv_files_to_delete = [file for file in os.listdir() if file.startswith('Historial_accion_from_')]
@@ -68,10 +63,10 @@ def index():
         for stock_symbol in stock_symbols:
             stock_symbol = stock_symbol.strip()
 
-            historial = get_stock_history(start_date, end_date, stock_symbol)
+            historial = get_stock_history(periodo_inicial, periodo_final, stock_symbol)
 
             # Guardar los datos en un archivo CSV
-            csv_filename = f'Historial_accion_from_{stock_symbol}_{start_date.strftime("%Y-%m-%d")}_to_{end_date.strftime("%Y-%m-%d")}.csv'
+            csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
             historial.to_csv(csv_filename, index=True)
 
             # Verificar si el archivo se creó correctamente
@@ -81,6 +76,7 @@ def index():
         return render_template('result.html', csv_filenames=csv_filenames)
 
     return render_template('index.html')
+
 
 @app.route('/acciones', methods=['GET'])
 def acciones():
