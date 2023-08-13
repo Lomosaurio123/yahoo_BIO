@@ -1,20 +1,30 @@
+from flask import render_template
 import yfinance as yf,csv, io, datetime
+
+def valiadcion_accion_existente(stock_symbol):
+    #Verificamos que las acciones ingresadas existan
+    try:
+        name_action=yf.Ticker(stock_symbol).info
+    except Exception as e:
+        return True
 
 def buscador_previo(start_date, stock_symbol):
     # Configuración de parámetros
     periodo_inicial = start_date
     dia_previo = start_date
-    dias_maximos_busqueda = 30  # Número máximo de días a retroceder
+    dias_maximos_busqueda = 10  # Número máximo de días a retroceder
 
     # Bucle hasta encontrar datos o alcanzar el límite de días
     for _ in range(dias_maximos_busqueda):
-        stock_data = get_stock_history(dia_previo, periodo_inicial, stock_symbol)
+        stock_data = yf.download(stock_symbol, start=dia_previo, end=periodo_inicial)
+
         if not stock_data.empty:
             return dia_previo
         dia_previo = dia_previo - datetime.timedelta(days=1)
-    
+
     # Si no se encontraron datos en el rango máximo, regresa None
     return "1000-01-01"
+
 
 
 def get_stock_history(start_date, end_date, stock_symbol):

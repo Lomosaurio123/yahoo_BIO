@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-    
-    <script type="text/javascript" src="{{ url_for('serve_script', filename='index.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
 
+    <script type="text/javascript" src="{{ url_for('serve_script', filename='index.js') }}"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                <img src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                <img src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24"
+                    class="d-inline-block align-text-top">
                 ActionTrackr
             </a>
         </div>
@@ -26,7 +31,8 @@
                 <form method="POST" action="/">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Nombre de la acción</span>
-                        <input type="text" name="stock_symbol" id="stock_symbol" required oninput="getActionSuggestions()" class="form-control form-control">
+                        <input type="text" name="stock_symbol" id="stock_symbol" required
+                            oninput="getActionSuggestions()" class="form-control form-control">
                     </div>
                     <button type="button" class="btn btn-danger btn-sm" id="limpiar">Limpiar</button>
                     <div id="suggestions"></div>
@@ -36,29 +42,32 @@
                 <form method="POST" action="/">
                     <div class="input-group">
                         <span class="input-group-text">Fecha inicial</span>
-                        <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required id="start_date" max="" />
+                        <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required
+                            id="start_date" max="" />
                     </div>
                     <div class="input-group">
                         <span class="input-group-text">Fecha final ‎ ‎ </span>
-                        <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required id="end_date" max="">
+                        <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required
+                            id="end_date" max="">
                     </div>
                     <br>
-                    <button type="submit" class="btn btn-success btn-sm" value="Enviar petición">Enviar petición</button>
+                    <button type="submit" class="btn btn-success btn-sm" value="Enviar petición">Enviar
+                        petición</button>
                 </form>
             </div>
-            
+
         </div>
     </div>
     <script>
         // Obtener la fecha actual en el formato "AAAA-MM-DD"
         const fechaActual = new Date().toISOString().split("T")[0];
-    
+
         // Actualizar el atributo max del campo de fecha
         document.getElementById("start_date").setAttribute("max", fechaActual);
         document.getElementById("end_date").setAttribute("max", fechaActual);
 
 
-        document.getElementById('limpiar').addEventListener('click', function() {
+        document.getElementById('limpiar').addEventListener('click', function () {
             document.getElementById('stock_symbol').value = '';
             document.getElementById('suggestions').innerHTML = '';
             return false; // Evita que el formulario se envíe
@@ -68,4 +77,5 @@
         showError("{{ error_message }}");
     </script>
 </body>
+
 </html>

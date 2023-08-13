@@ -1,27 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
     <style>
         table.table-bordered .color-verde {
             color: green;
         }
-    
+
         table.table-bordered .color-rojo {
             color: red;
+        }
+
+        table.table-bordered .color-azul {
+            color: rgb(0, 0, 255);
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid d-flex justify-content-between">
             <a class="navbar-brand" href="/">
-                <img  src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                <img src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24"
+                    class="d-inline-block align-text-top">
                 ActionTrackr
             </a>
         </div>
@@ -32,7 +42,7 @@
 
         <div>
             <table class="table table-bordered">
-                <tr style="text-align: center;" >
+                <tr style="text-align: center;">
                     <th>Máximo:</th>
                     <td id="maximo-adj-close"></td>
                     <th>Mínimo:</th>
@@ -43,6 +53,9 @@
             </table>
         </div>
 
+        <div align="center">
+            <h4>Datos disponibles desde {{ fecha_inicial }} a {{ fecha_final }}</h4>
+        </div>
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -56,7 +69,7 @@
                     <th>Volume</th>
                 </tr>
                 {% for dato in datos %}
-                <tr>
+                <tr {% if loop.first %}hidden{% endif %}>
                     <td>{{ dato['Date'] }}</td>
                     <td class="columna-Open">{{ dato['Open'] }}</td>
                     <td class="columna-High">{{ dato['High'] }}</td>
@@ -68,24 +81,28 @@
                 {% endfor %}
             </table>
         </div>
+
+
     </div>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             var columnas = ['Open', 'High', 'Low', 'Close', 'Adj_Close', 'Volume'];
-    
+
             for (var i = 0; i < columnas.length; i++) {
                 var nombreColumna = columnas[i];
                 var numeroCeldas = $(".columna-" + nombreColumna);
-    
-                numeroCeldas.each(function(index) {
+
+                numeroCeldas.each(function (index) {
                     if (index > 0) {
                         var numeroActual = parseFloat($(this).text());
                         var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + nombreColumna).text());
-                        
+
                         if (numeroActual > numeroAnterior) {
                             $(this).addClass("color-verde");
                         } else if (numeroActual < numeroAnterior) {
                             $(this).addClass("color-rojo");
+                        } else if (numeroActual = numeroAnterior) {
+                            $(this).addClass("color-azul");
                         }
                     }
                 });
@@ -93,46 +110,50 @@
         });
     </script>
 
-<script>
-    $(document).ready(function() {
-        var columnaAnalizada = 'Adj_Close'; // Columna a analizar (Precio de Cierre Ajustado)
-        var valores = {
-            maximo: -Infinity,
-            minimo: Infinity,
-            suma: 0,
-            contador: 0
-        };
+    <script>
+        $(document).ready(function () {
+            var columnaAnalizada = 'Adj_Close'; // Columna a analizar (Precio de Cierre Ajustado)
+            var valores = {
+                maximo: -Infinity,
+                minimo: Infinity,
+                suma: 0,
+                contador: 0
+            };
 
-        // Recorre las celdas de la columna Adj_Close para calcular los valores
-        $(".columna-" + columnaAnalizada).each(function(index) {
-            var numeroActual = parseFloat($(this).text());
+            $(".columna-" + columnaAnalizada).each(function (index) {
+                // Ignora la primera fila (fila 0)
+                if (index > 0) {
+                    var numeroActual = parseFloat($(this).text());
 
-            // Actualiza el valor máximo
-            if (numeroActual > valores.maximo) {
-                valores.maximo = numeroActual;
-            }
+                    // Actualiza el valor máximo
+                    if (numeroActual > valores.maximo) {
+                        valores.maximo = numeroActual;
+                    }
 
-            // Actualiza el valor mínimo
-            if (numeroActual < valores.minimo) {
-                valores.minimo = numeroActual;
-            }
+                    // Actualiza el valor mínimo
+                    if (numeroActual < valores.minimo) {
+                        valores.minimo = numeroActual;
+                    }
 
-            // Actualiza la suma y el contador para el promedio
-            valores.suma += numeroActual;
-            valores.contador++;
+                    // Actualiza la suma y el contador para el promedio
+                    valores.suma += numeroActual;
+                    valores.contador++;
+                    console.log(valores.contador);
+                }
+            });
+
+            // Calcula y muestra los valores máximo, mínimo y promedio en la tabla
+            var celdaMaximo = $("<td>").text(valores.maximo.toFixed(2));
+            var celdaMinimo = $("<td>").text(valores.minimo.toFixed(2));
+            var celdaPromedio = $("<td>").text((valores.suma / valores.contador).toFixed(2));
+
+            // Inserta los valores en las celdas correspondientes de la tabla de resumen
+            $("#maximo-adj-close").html(celdaMaximo);
+            $("#minimo-adj-close").html(celdaMinimo);
+            $("#promedio-adj-close").html(celdaPromedio);
         });
-
-        // Calcula y muestra los valores máximo, mínimo y promedio en la tabla
-        var celdaMaximo = $("<td>").text(valores.maximo.toFixed(2));
-        var celdaMinimo = $("<td>").text(valores.minimo.toFixed(2));
-        var celdaPromedio = $("<td>").text((valores.suma / valores.contador).toFixed(2));
-
-        // Inserta los valores en las celdas correspondientes de la tabla de resumen
-        $("#maximo-adj-close").html(celdaMaximo);
-        $("#minimo-adj-close").html(celdaMinimo);
-        $("#promedio-adj-close").html(celdaPromedio);
-    });
-</script>
+    </script>
 
 </body>
+
 </html>

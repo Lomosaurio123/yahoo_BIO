@@ -1,7 +1,7 @@
-import csv, requests, os, numpy as np
+import csv, requests, os, numpy as np, pandas as pd
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-from functions import get_stock_history, clean_keys, get_adj_close,generar_csv, buscador_previo
+from functions import get_stock_history, clean_keys, get_adj_close,generar_csv, buscador_previo, valiadcion_accion_existente
 
 app = Flask(__name__)
 
@@ -49,6 +49,13 @@ def index():
             return render_template('index.html', error_message="La fecha inicial debe ser anterior a la fecha final")
 
         stock_symbols = request.form['stock_symbol'].split(',') 
+
+        #Validamos que existan las acciones
+        for stock_symbol in stock_symbols:
+            if valiadcion_accion_existente(stock_symbol):
+                msj_error="Una de las acciones no se encontro, verifica los datos"
+                return render_template('index.html', error_message=msj_error)
+
         stock_symbols.append("^MXX")
 
         # Eliminar archivos CSV con nombre que comienza con 'Historial_'
@@ -69,7 +76,7 @@ def index():
 
             # Guardar los datos en un archivo CSV
             csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
-            historial.to_csv(csv_filename, index=True)
+            historial.to_csv(csv_filename, index=True, sep=',',encoding='utf-8')
 
             # Verificar si el archivo se creó correctamente
             if os.path.exists(csv_filename):
@@ -80,31 +87,21 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/acciones', methods=['GET'])
-def acciones():
-    # Lista para almacenar las abreviaciones de las acciones y sus nombres completos
-    lista_acciones = []
-
-    # Ruta al archivo CSV
-    csv_filename = 'Lista_acciones.csv'
-
-    # Leer y mostrar el contenido del archivo CSV
-    with open(csv_filename, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            abreviacion = row['ï»¿Abreviacion']
-            nombre_completo = row['NombreCompleto']
-            lista_acciones.append({'abreviacion': abreviacion, 'nombre_completo': nombre_completo})
-
-    return render_template('acciones.html', lista_acciones=lista_acciones)
-
 @app.route('/download', methods=['GET'])
 def download():
     csv_filename = request.args.get('csv_filename')
-    if csv_filename:
-        return send_file(csv_filename, as_attachment=True)
+    historial = pd.read_csv(csv_filename)
+
+    # Definir el nombre del archivo .xlsx para la conversión
+    xlsx_filename = csv_filename[:-4]+'.xlsx'	
+
+    # Guardar el DataFrame en un archivo Excel (.xlsx)
+    historial.to_excel(xlsx_filename, index=False)
+
+    if xlsx_filename:
+        return send_file(xlsx_filename, as_attachment=True)
     else:
-        return "Error: Nombre de archivo no proporcionado."
+        return "Error: Nombre de archivo no proporcionado"
 
 
 @app.route('/display', methods=['GET'])
@@ -120,8 +117,10 @@ def display():
             for row in reader:
                 cleaned_row = clean_keys(row)
                 datos.append(cleaned_row)
-
-        return render_template('display.html', datos=datos,nombre=csv_filename)
+        fecha_inicial=datos[1]['Date']
+        fecha_final=datos[-1]['Date']
+        
+        return render_template('display.html', datos=datos,nombre=csv_filename,fecha_inicial=fecha_inicial,fecha_final=fecha_final)
     else:
         return "Error: El archivo CSV no existe."
 
@@ -175,7 +174,8 @@ def rendimientos():
     # Calcular el rendimiento anual de cada acción
     rendimientos_anuales = {}
     for stock_symbol, rendimientos in rendimientos_diarios.items():
-        rendimientos_anuales[stock_symbol] = np.mean(rendimientos) * 252
+        ultimos252=rendimientos[-252:]
+        rendimientos_anuales[stock_symbol] = np.mean(ultimos252) * 252
 
     Cof_var = {}
     for stock_symbol, rendimientos in desviacion_estandar.items():

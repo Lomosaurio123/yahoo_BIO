@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid d-flex justify-content-between">
             <a class="navbar-brand" href="/">
-                <img  src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                <img src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24"
+                    class="d-inline-block align-text-top">
                 ActionTrackr
             </a>
         </div>
@@ -20,7 +25,7 @@
     <h3 align="center">Resultado de la consulta</h3>
     <hr class="border border-black border-2 opacity-50">
     <h4>Estadisticas</h4>
-    
+
     <form method="get" action="/prices">
         {% for csv_filename in csv_filenames %}
         <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
@@ -32,29 +37,33 @@
         {% for csv_filename in csv_filenames %}
         <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
         {% endfor %}
-        <button type="submit" class="btn btn-outline-secondary btn-sm" value="Ver rendimientos">Ver rendimientos</button>
+        <button type="submit" class="btn btn-outline-secondary btn-sm" value="Ver rendimientos">Ver
+            rendimientos</button>
     </form>
 
     <form method="get" action="/matriz_correlacion">
-        
-        <button type="submit" class="btn btn-outline-primary btn-sm" value="matriz_correlacion">Matriz de correlación</button>
+
+        <button type="submit" class="btn btn-outline-primary btn-sm" value="matriz_correlacion">Matriz de
+            correlación</button>
     </form>
 
 
     <hr class="border border-black border-2 opacity-50">
     {% for csv_filename in csv_filenames %}
-        <h5>Archivo: {{ csv_filename }}</h5>
-        <form method="get" action="/display">
-            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
-            <button type="submit" value="Ver CSV" class="btn btn-outline-info btn-sm">Ver CSV</button>
-        </form>
-        <form method="get" action="/download">
-            <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
-            <button type="submit" value="Descargar CSV" class="btn btn-outline-success btn-sm">Descargar CSV</button>
-        </form>
+    <h5>Archivo: {{ csv_filename }}</h5>
+    <form method="get" action="/display">
+        <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+        <button type="submit" value="Ver CSV" class="btn btn-outline-info btn-sm">Ver CSV</button>
+    </form>
 
-        <hr class="border border-black border-2 opacity-50">
+    <form method="get" action="/download">
+        <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+        <button type="submit" class="btn btn-outline-success btn-sm">Descargar XLSX</button>
+    </form>
+
+    <hr class="border border-black border-2 opacity-50">
     {% endfor %}
 
 </body>
+
 </html>

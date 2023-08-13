@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionTrackr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        th, td {
+        th,
+        td {
             border: 5px solid black;
             padding: 8px;
             text-align: center;
@@ -25,21 +30,22 @@
         th.columna_estadisticas_ancho {
             width: 170px;
         }
-
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid d-flex justify-content-between">
             <a class="navbar-brand" href="/">
-                <img  src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                <img src="{{ url_for('serve_static', filename='Logo.png') }}" alt="Logo" width="30" height="24"
+                    class="d-inline-block align-text-top">
                 ActionTrackr
             </a>
         </div>
     </nav>
-    
+
     <form id="csvForm" method="post" action="/download_csv">
-        <input type="hidden" name="nombre_csv" value="Rendimientos.csv" >
+        <input type="hidden" name="nombre_csv" value="Rendimientos.csv">
         <div class="d-flex justify-content-between">
             <h3>Rendimientos</h3>
             <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="GenerarCSV">
@@ -58,37 +64,37 @@
             <tr>
                 <th>Acciones</th>
                 {% for record in data %}
-                    <th>{{ record.stock_symbol }}</th>
+                <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
-        <tr>
-            <th>Rendimiento anual</th>
-            {% for record in data %}
-                    <td>{{ '%.4f' % rendimientos_anuales[record.stock_symbol] }}%</td>
+            <tr>
+                <th>Rendimiento anual</th>
+                {% for record in data %}
+                <td>{{ '%.4f' % rendimientos_anuales[record.stock_symbol] }}%</td>
                 {% endfor %}
-        </tr>
+            </tr>
             <tr>
                 <th>SD ANUAL</th>
                 {% for record in data %}
-                    <td>{{ '%.4f' % desviacion_estandar[record.stock_symbol] }}</td>
+                <td>{{ '%.4f' % desviacion_estandar[record.stock_symbol] }}</td>
                 {% endfor %}
             </tr>
             <tr>
                 <th>CV</th>
                 {% for record in data %}
-                    <td>{{ '%.4f' % coeficiente[record.stock_symbol] }}</td>
+                <td>{{ '%.4f' % coeficiente[record.stock_symbol] }}</td>
                 {% endfor %}
             </tr>
             <tr>
                 <th>Beta</th>
                 {% for record in data %}
-                    <td>{{ '%.4f' % beta[record.stock_symbol] }}</td>
+                <td>{{ '%.4f' % beta[record.stock_symbol] }}</td>
                 {% endfor %}
             </tr>
             <tr>
                 <th>Sistematico</th>
                 {% for record in data %}
-                    <td>{{ '%.4f' % sistematico[record.stock_symbol] }}%</td>
+                <td>{{ '%.4f' % sistematico[record.stock_symbol] }}%</td>
                 {% endfor %}
             </tr>
             <tr>
@@ -116,33 +122,35 @@
 
     <div class="container mt-4">
         <table class="table table-bordered" id="datosTabla">
-            <tr style="text-align: center;">    
+            <tr style="text-align: center;">
                 <th colspan="{{ data|length + 1 }}">Rendimiento diario</th>
             </tr>
             <tr>
                 <th>Fecha</th>
                 {% for record in data %}
-                    <th>{{ record.stock_symbol }}</th>
+                <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
+
             {% for i in range(data[0].adj_close_data|length) %}
-                <tr>
-                    <td>{{ data[0].adj_close_data[i].date }}</td>
-                    {% for j in range(data|length) %}
-                        {% if i == 0 %}
-                            <td class="columna-{{ data[j].stock_symbol }}">0%</td>
-                        {% else %}
-                            {% set previous_close = data[j].adj_close_data[i-1].adj_close %}
-                            {% set current_close = data[j].adj_close_data[i].adj_close %}
-                            {% set result = ((previous_close / current_close) - 1) * 100 %}
-                            <td class="columna-{{ data[j].stock_symbol }}">{{ '%.4f' % result }}%</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            {% endfor %}    
+            <tr {% if loop.first %}hidden{% endif %}>
+                <td>{{ data[0].adj_close_data[i].date }}</td>
+                {% for j in range(data|length) %}
+                {% if i == 0 %}
+                <td class="columna-{{ data[j].stock_symbol }}">0%</td>
+                {% else %}
+                {% set previous_close = data[j].adj_close_data[i-1].adj_close %}
+                {% set current_close = data[j].adj_close_data[i].adj_close %}
+                {% set result = ((previous_close / current_close) - 1) * 100 %}
+                <td class="columna-{{ data[j].stock_symbol }}">{{ '%.4f' % result }}%</td>
+                {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
         </table>
-        
+
         <script src="{{ url_for('serve_script', filename='rendimientos.js') }}"> </script>
     </div>
 </body>
+
 </html>
