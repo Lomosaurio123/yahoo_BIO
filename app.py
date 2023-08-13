@@ -1,22 +1,20 @@
-import csv
-import io
-import requests
+import csv, requests, os, numpy as np
 from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-import os
-import numpy as np
-from functions import get_stock_history, clean_keys, get_adj_close
+from functions import get_stock_history, clean_keys, get_adj_close,generar_csv, buscador_previo
 
 app = Flask(__name__)
 
+#RUTAS PARA ACCEDER A ARCHIVOS EXTERNOS--------------------------------------------------
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     root_dir = os.path.dirname(os.getcwd())
-    return send_from_directory(os.path.join(root_dir, 'static'), filename)
+    return send_from_directory(os.path.join(root_dir, 'Static'), filename)
 
-@app.route('/Scripts/<path:filename>')
+@app.route('/scripts/<path:filename>')
 def serve_script(filename):
-    return send_from_directory('Scripts', filename)
+    return send_from_directory(os.path.join(app.root_path, 'Scripts'), filename)
+#----------------------------------------------------------------------------------------
 
 @app.route('/get_suggestions', methods=['GET'])
 def get_suggestions():
@@ -62,8 +60,12 @@ def index():
 
         for stock_symbol in stock_symbols:
             stock_symbol = stock_symbol.strip()
+            prev_periodo_inicial=buscador_previo(periodo_inicial, stock_symbol)
 
-            historial = get_stock_history(periodo_inicial, periodo_final, stock_symbol)
+        for stock_symbol in stock_symbols:
+            stock_symbol = stock_symbol.strip()
+
+            historial = get_stock_history(prev_periodo_inicial, periodo_final, stock_symbol)
 
             # Guardar los datos en un archivo CSV
             csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
@@ -134,6 +136,12 @@ def prices():
             all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
 
     return render_template('prices.html', data=all_adj_close_data)
+
+@app.route('/matriz_correlacion', methods=['GET'])
+def matriz_correlacion():
+
+
+    return render_template('matriz_correlacion.html')
 
 @app.route('/rendimientos', methods=['GET'])
 def rendimientos():
@@ -216,31 +224,6 @@ def rendimientos():
     return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, 
                            coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
 
-
-def generar_csv(data):
-    if not data:
-        return "Error: No se seleccionaron datos para la generación del CSV."
-
-    csv_data = {}
-    for item in data:
-        date, stock_symbol, adj_close = item.split(',')
-        if date not in csv_data:
-            csv_data[date] = {}
-        csv_data[date][stock_symbol] = adj_close
-
-    # Generar el archivo CSV en memoria
-    csv_buffer = io.StringIO()
-    fieldnames = ['Fecha'] + list(csv_data[data[0].split(',')[0]].keys())
-    writer = csv.writer(csv_buffer)
-    writer.writerow(fieldnames)
-
-    for date, adj_close_data in csv_data.items():
-        row_data = [date]
-        for stock_symbol in fieldnames[1:]:
-            row_data.append(adj_close_data.get(stock_symbol, ''))
-        writer.writerow(row_data)
-
-    return csv_buffer.getvalue()
 
 @app.route('/download_csv', methods=['POST'])
 def download_csv():

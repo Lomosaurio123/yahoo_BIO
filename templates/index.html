@@ -6,31 +6,9 @@
     <title>ActionTrackr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-    <script src="{{ url_for('serve_script', filename='suggestions.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="css/index.css">
-    <script>
-        // Función para mostrar el mensaje de error si es necesario
-        function showError(errorMessage) {
-            if (errorMessage) {
-                alert(errorMessage);  // Muestra una alerta simple
-            }
-        }
-    </script>
-    <style>
-        .custom-input-group {
-            display: flex;
-            align-items: center;
-        width: 100%;
-        }
+    
+    <script type="text/javascript" src="{{ url_for('serve_script', filename='index.js') }}"></script>
 
-    .custom-input-group .input-group-text {
-        min-width: 100px; /* Ajusta este valor según tus preferencias */
-    }
-
-    .custom-input-group .form-control {
-        flex: 1;
-    }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -41,7 +19,7 @@
             </a>
         </div>
     </nav>
-    <div class="container-fluid">
+    <div class="container-fluid ">
         <div class="row">
             <div class="col-lg-6">
                 <h1>Consulta Acciones</h1>
@@ -58,11 +36,11 @@
                 <form method="POST" action="/">
                     <div class="input-group">
                         <span class="input-group-text">Fecha inicial</span>
-                        <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required>
+                        <input type="date" name="start_date" aria-label="Fecha inicial" class="form-control" required id="start_date" max="" />
                     </div>
                     <div class="input-group">
                         <span class="input-group-text">Fecha final ‎ ‎ </span>
-                        <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required>
+                        <input type="date" name="end_date" aria-label="Fecha final" class="form-control" required id="end_date" max="">
                     </div>
                     <br>
                     <button type="submit" class="btn btn-success btn-sm" value="Enviar petición">Enviar petición</button>
@@ -72,12 +50,20 @@
         </div>
     </div>
     <script>
+        // Obtener la fecha actual en el formato "AAAA-MM-DD"
+        const fechaActual = new Date().toISOString().split("T")[0];
+    
+        // Actualizar el atributo max del campo de fecha
+        document.getElementById("start_date").setAttribute("max", fechaActual);
+        document.getElementById("end_date").setAttribute("max", fechaActual);
+
+
         document.getElementById('limpiar').addEventListener('click', function() {
             document.getElementById('stock_symbol').value = '';
             document.getElementById('suggestions').innerHTML = '';
+            return false; // Evita que el formulario se envíe
         });
-    </script>
-    <script>
+
         // Llama a la función para mostrar el mensaje de error
         showError("{{ error_message }}");
     </script>

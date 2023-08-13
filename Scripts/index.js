@@ -51,8 +51,9 @@ function getActionSuggestions() {
     }
 }
 
-// Limpia las sugerencias cuando se haga clic en el botón "Limpiar"
-document.getElementById('limpiar').addEventListener('click', () => {
-    previousSuggestions = [];
-    document.getElementById('suggestions').innerHTML = '';
-});
+// Función para mostrar el mensaje de error si es necesario
+function showError(errorMessage) {
+    if (errorMessage) {
+        alert(errorMessage);  // Muestra una alerta simple
+        }
+}

@@ -17,8 +17,10 @@
             </a>
         </div>
     </nav>
-    <h3>Resultado de la consulta</h3>
+    <h3 align="center">Resultado de la consulta</h3>
+    <hr class="border border-black border-2 opacity-50">
     <h4>Estadisticas</h4>
+    
     <form method="get" action="/prices">
         {% for csv_filename in csv_filenames %}
         <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
@@ -32,6 +34,13 @@
         {% endfor %}
         <button type="submit" class="btn btn-outline-secondary btn-sm" value="Ver rendimientos">Ver rendimientos</button>
     </form>
+
+    <form method="get" action="/matriz_correlacion">
+        
+        <button type="submit" class="btn btn-outline-primary btn-sm" value="matriz_correlacion">Matriz de correlación</button>
+    </form>
+
+
     <hr class="border border-black border-2 opacity-50">
     {% for csv_filename in csv_filenames %}
         <h5>Archivo: {{ csv_filename }}</h5>

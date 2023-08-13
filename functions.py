@@ -1,5 +1,22 @@
-import yfinance as yf
-import csv
+import yfinance as yf,csv, io, datetime
+
+def buscador_previo(start_date, stock_symbol):
+    # Configuración de parámetros
+    periodo_inicial = start_date
+    dia_previo = start_date
+    dias_maximos_busqueda = 30  # Número máximo de días a retroceder
+
+    # Bucle hasta encontrar datos o alcanzar el límite de días
+    for _ in range(dias_maximos_busqueda):
+        stock_data = get_stock_history(dia_previo, periodo_inicial, stock_symbol)
+        if not stock_data.empty:
+            return dia_previo
+        dia_previo = dia_previo - datetime.timedelta(days=1)
+    
+    # Si no se encontraron datos en el rango máximo, regresa None
+    return "1000-01-01"
+
+
 def get_stock_history(start_date, end_date, stock_symbol):
     stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
     return stock_data
@@ -21,3 +38,28 @@ def get_adj_close(csv_filename):
             cleaned_row = clean_keys(row)
             adj_close_data.append({'date': row['Date'], 'adj_close': float(cleaned_row['Adj_Close'])})
     return stock_symbol, adj_close_data
+
+def generar_csv(data):
+    if not data:
+        return "Error: No se seleccionaron datos para la generación del CSV."
+
+    csv_data = {}
+    for item in data:
+        date, stock_symbol, adj_close = item.split(',')
+        if date not in csv_data:
+            csv_data[date] = {}
+        csv_data[date][stock_symbol] = adj_close
+
+    # Generar el archivo CSV en memoria
+    csv_buffer = io.StringIO()
+    fieldnames = ['Fecha'] + list(csv_data[data[0].split(',')[0]].keys())
+    writer = csv.writer(csv_buffer)
+    writer.writerow(fieldnames)
+
+    for date, adj_close_data in csv_data.items():
+        row_data = [date]
+        for stock_symbol in fieldnames[1:]:
+            row_data.append(adj_close_data.get(stock_symbol, ''))
+        writer.writerow(row_data)
+
+    return csv_buffer.getvalue()
