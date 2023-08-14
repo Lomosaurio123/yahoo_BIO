@@ -20,7 +20,7 @@
         }
 
         table.table-bordered .color-azul {
-            color: rgb(0, 0, 255);
+            color: blue;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -101,7 +101,7 @@
                             $(this).addClass("color-verde");
                         } else if (numeroActual < numeroAnterior) {
                             $(this).addClass("color-rojo");
-                        } else if (numeroActual = numeroAnterior) {
+                        } else if (numeroActual == numeroAnterior) {
                             $(this).addClass("color-azul");
                         }
                     }

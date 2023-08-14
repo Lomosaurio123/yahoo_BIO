@@ -1,7 +1,9 @@
-import csv, requests, os, numpy as np, pandas as pd
-from flask import Flask, make_response, render_template, request, send_file, jsonify, send_from_directory
+import csv, requests, os, numpy as np, pandas as pd,json
+import xlsxwriter
+from io import BytesIO
+from flask import Flask, Response, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-from functions import get_stock_history, clean_keys, get_adj_close,generar_csv, buscador_previo, valiadcion_accion_existente
+from functions import get_stock_history, clean_keys, get_adj_close, buscador_previo, valiadcion_accion_existente
 
 app = Flask(__name__)
 
@@ -49,6 +51,7 @@ def index():
             return render_template('index.html', error_message="La fecha inicial debe ser anterior a la fecha final")
 
         stock_symbols = request.form['stock_symbol'].replace(" ", "").split(',') 
+        stock_symbols = [symbol.upper() for symbol in stock_symbols]
 
         # Eliminar archivos generados anteriormente con nombre que comienza con 'Historial_accion_from_'
         csv_files_to_delete = [file for file in os.listdir() if file.startswith('Historial_accion_from_')]
@@ -75,6 +78,8 @@ def index():
             historial = get_stock_history(prev_periodo_inicial, periodo_final, stock_symbol)
 
             # Guardar los datos en un archivo CSV
+            if stock_symbol=='^MXX':
+                stock_symbol='IPC'
             csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
             historial.to_csv(csv_filename, index=True, sep=',',encoding='utf-8')
 
@@ -85,27 +90,6 @@ def index():
         return render_template('result.html', csv_filenames=csv_filenames)
 
     return render_template('index.html')
-
-
-@app.route('/download', methods=['GET'])
-def download():
-    csv_filename = request.args.get('csv_filename')
-    historial = pd.read_csv(csv_filename)
-
-    # Eliminar la primera fila (excepto los encabezados)
-    historial = historial.iloc[1:]
-
-    # Definir el nombre del archivo .xlsx para la conversión
-    xlsx_filename = csv_filename[:-4] + '.xlsx'	
-
-    # Guardar el DataFrame en un archivo Excel (.xlsx)
-    historial.to_excel(xlsx_filename, index=False)
-
-    if xlsx_filename:
-        return send_file(xlsx_filename, as_attachment=True)
-    else:
-        return "Error: Nombre de archivo no proporcionado"
-
 
 @app.route('/display', methods=['GET'])
 def display():
@@ -228,18 +212,49 @@ def rendimientos():
                            coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
 
 
-@app.route('/download_csv', methods=['POST'])
-def download_csv():
-    data = request.form.getlist('data[]')
-    filename = request.form.get('nombre_csv')  # Obtener el nombre del archivo
+@app.route('/download', methods=['GET'])
+def download():
+    csv_filename = request.args.get('csv_filename')
+    historial = pd.read_csv(csv_filename)
 
-    contenido_csv = generar_csv(data)
+    # Eliminar la primera fila (excepto los encabezados)
+    historial = historial.iloc[1:]
 
-    # Preparar la respuesta para descargar el archivo CSV
-    response = make_response(contenido_csv)
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-    response.headers["Content-type"] = "text/csv"
+    # Definir el nombre del archivo .xlsx para la conversión
+    xlsx_filename = csv_filename[:-4] + '.xlsx'	
 
+    # Guardar el DataFrame en un archivo Excel (.xlsx)
+    historial.to_excel(xlsx_filename, index=False)
+
+    if xlsx_filename:
+        return send_file(xlsx_filename, as_attachment=True)
+    else:
+        return "Error: Nombre de archivo no proporcionado"
+
+
+@app.route('/download_tabla', methods=['POST'])
+def download_tabla():
+    tableData = request.form.get('tableData')
+    tableData = json.loads(tableData)
+    del tableData[1]
+    
+    # Crear un archivo XLSX en memoria
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+    
+    
+    for row_num, row in enumerate(tableData):
+        for col_num, cell_value in enumerate(row):
+            worksheet.write(row_num, col_num, cell_value)
+    workbook.close()
+    
+    output.seek(0)
+
+    # EL PROBLEMA ESTA AQUI
+    response = Response(output.read(), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response.headers["Content-Disposition"] = "attachment; filename=Precios.xlsx"
+    
     return response
 
 if __name__ == '__main__':

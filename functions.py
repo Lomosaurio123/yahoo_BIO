@@ -29,8 +29,6 @@ def buscador_previo(start_date, stock_symbol):
             return dia_previo
         dia_previo = dia_previo - datetime.timedelta(days=1)
 
-
-
 def get_stock_history(start_date, end_date, stock_symbol):
     stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
     return stock_data

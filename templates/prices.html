@@ -26,6 +26,10 @@
         table.table-bordered .color-rojo {
             color: red;
         }
+
+        table.table-bordered .color-azul {
+            color: blue;
+        }
     </style>
 </head>
 
@@ -40,110 +44,91 @@
         </div>
     </nav>
 
-    <form id="csvForm" method="post" action="/download_csv">
-        <input type="hidden" name="nombre_csv" value="Precios.csv">
+    <form id="csvForm" method="post" action="/download_tabla">
+        <input type="hidden" name="nombre_csv" value="Precios.xlsx">
         <div class="d-flex justify-content-between">
             <h3>Precios</h3>
-            <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="generarCSV">
+            <button type="submit" class="btn btn-outline-success btn-sm" id="Tabla_datos">Descargar Tabla</button>
         </div>
     </form>
+    
 
     <div class="container mt-4">
         <table class="table table-bordered" id="datosTabla">
             <tr style="text-align: center;">
-                <th>Fecha</th>
+
+            <tr>
                 {% for record in data %}
+                <th>Fecha</th>
                 <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
-            {% for i in range(data[0].adj_close_data|length) %}
-            <tr>
-                <td>{{ data[0].adj_close_data[i].date }}</td>
-                {% for record in data %}
-                {% set symbol_id = record.stock_symbol|replace('^', '_') %}
-                <td class="columna-{{ symbol_id }}">{{ record.adj_close_data[i].adj_close }}</td>
-                {% endfor %}
+
+            {% set max_data_length = data|map(attribute='adj_close_data')|map('length')|max %}
+  
+            {% for i in range(max_data_length) %}
+            <tr {% if i == 0 %}hidden{% endif %}>
+              {% for record in data %}
+                {% if i < record.adj_close_data|length %}
+                  <td>{{ record.adj_close_data[i].date }}</td>
+                  <td class="columna-{{ record.stock_symbol }}">{{ record.adj_close_data[i].adj_close }}</td>
+                {% else %}
+                  <td></td>
+                  <td></td>
+                {% endif %}
+              {% endfor %}
             </tr>
-            {% endfor %}
+          {% endfor %}
         </table>
     </div>
 
     <script>
         $(document).ready(function () {
-            var columnas = ['Adj_Close'];
-
-            // Obtener todas las columnas presentes en la tabla
-            $(".table th").each(function () {
-                columnas.push($(this).text());
-            });
-
-            for (var i = 0; i < columnas.length; i++) {
-                var nombreColumna = columnas[i];
-                var symbol_id = nombreColumna.replace('^', '_');
-                var symbol_id_selector = $.escapeSelector(symbol_id); // Escapar el selector
-                var numeroCeldas = $(".columna-" + symbol_id_selector);
-
-                numeroCeldas.each(function (index) {
-                    if (index > 0) {
-                        var numeroActual = parseFloat($(this).text());
-                        var numeroAnterior = parseFloat($(this).closest("tr").prev().find(".columna-" + symbol_id_selector).text());
-
-                        if (numeroActual > numeroAnterior) {
-                            $(this).addClass("color-verde");
-                        } else if (numeroActual < numeroAnterior) {
-                            $(this).addClass("color-rojo");
-                        }
+            // Obtener todas las celdas con clases columna-*
+            var cellsWithClasses = document.querySelectorAll('td[class^="columna-"]');
+            
+            // Iterar a través de las celdas y analizar los valores
+            cellsWithClasses.forEach(function(cell) {
+                var cellContent = cell.textContent.trim();
+                var numeroActual = parseFloat(cellContent);
+                
+                if (!isNaN(numeroActual)) {
+                    // Obtener la clase específica de la celda (por ejemplo, columna-XYZ)
+                    var specificClass = cell.className.match(/columna-[A-Za-z0-9]+/);
+                    
+                    if (specificClass) {
+                        specificClass = specificClass[0];
+                        var selector = "." + specificClass;
+                        
+                        // Obtener todas las celdas en la misma columna
+                        var cellsInColumn = document.querySelectorAll(selector);
+                        
+                        // Inicializar el valor anterior como vacío
+                        var numeroAnterior = "";
+                        
+                        // Iterar a través de las celdas en la misma columna y aplicar lógica de colores
+                        cellsInColumn.forEach(function(colCell) {
+                            var colCellContent = colCell.textContent.trim();
+                            var colNumeroActual = parseFloat(colCellContent);
+                            
+                            if (!isNaN(colNumeroActual)) {
+                                if (colNumeroActual > numeroAnterior) {
+                                    $(colCell).addClass("color-verde");
+                                } else if (colNumeroActual < numeroAnterior) {
+                                    $(colCell).addClass("color-rojo");
+                                } else if (colNumeroActual === numeroAnterior) {
+                                    $(colCell).addClass("color-azul");
+                                }
+                                
+                                numeroAnterior = colNumeroActual;
+                            }
+                        });
                     }
-                });
-            }
-        });
-    </script>
-
-    <script>
-        function downloadCSV(csv, filename) {
-            var csvFile;
-            var downloadLink;
-
-            // Crear el archivo CSV
-            csvFile = new Blob([csv], { type: "text/csv" });
-
-            // Crear un enlace de descarga
-            downloadLink = document.createElement("a");
-
-            // Establecer el enlace para el archivo CSV
-            downloadLink.download = filename;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-
-            // Simular el clic para descargar el archivo
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-        }
-
-        function generateCSV() {
-            // Obtener los datos de la tabla
-            var table = document.getElementById("datosTabla");
-            var rows = table.getElementsByTagName("tr");
-
-            var csv = "";
-            for (var i = 0; i < rows.length; i++) {
-                var row = [],
-                    cols = rows[i].querySelectorAll("td, th");
-
-                for (var j = 0; j < cols.length; j++) {
-                    row.push(cols[j].innerText);
                 }
-
-                csv += row.join(",") + "\n";
-            }
-
-            // Descargar el archivo CSV
-            downloadCSV(csv, "Precios.csv");
-        }
-
-        // Asociar la función de generación de CSV al botón "Generar CSV"
-        document.getElementById("generarCSV").addEventListener("click", generateCSV);
-    </script>
+            });
+        });
+     </script>
+     <script src="{{ url_for('serve_script', filename='download_tabla.js') }}"> </script>
 </body>
 
 </html>
