@@ -1,13 +1,17 @@
 import yfinance as yf
-import datetime
-accion='NU'
-msft = yf.Ticker(accion)
-info = msft.info
-info=info['firstTradeDateEpochUtc']
-info=datetime.datetime.utcfromtimestamp(info)
 
+stock_symbols="AAPL, T, PLUG, TSLA, LCID, F, NIO,NU ,VZ, WFC".replace(" ", "").split(",")
 
-print(info)
+def validacion(stock_symbol):
+    try:
+        info=yf.Ticker(stock_symbol).info
+        return True
+    except Exception as e:
+        return False
 
-stock_data = yf.download(accion, start="1000-01-01", end='2021-12-10')
-print(stock_data)
+for stock_symbol in stock_symbols:
+    print(stock_symbol)
+    if validacion(stock_symbol):
+        print("la accion existe")
+    else:
+        print("La accion no existe")

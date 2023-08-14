@@ -48,26 +48,26 @@ def index():
         if periodo_inicial > periodo_final:
             return render_template('index.html', error_message="La fecha inicial debe ser anterior a la fecha final")
 
-        stock_symbols = request.form['stock_symbol'].split(',') 
+        stock_symbols = request.form['stock_symbol'].replace(" ", "").split(',') 
 
-        #Validamos que existan las acciones
-        for stock_symbol in stock_symbols:
-            if valiadcion_accion_existente(stock_symbol):
-                msj_error="Una de las acciones no se encontro, verifica los datos"
-                return render_template('index.html', error_message=msj_error)
-
-        stock_symbols.append("^MXX")
-
-        # Eliminar archivos CSV con nombre que comienza con 'Historial_'
+        # Eliminar archivos generados anteriormente con nombre que comienza con 'Historial_accion_from_'
         csv_files_to_delete = [file for file in os.listdir() if file.startswith('Historial_accion_from_')]
         for file_to_delete in csv_files_to_delete:
             os.remove(file_to_delete)
 
-        csv_filenames = []  # Lista para almacenar los nombres de archivo CSV generados
-
+        #Validamos que existan las acciones
         for stock_symbol in stock_symbols:
-            stock_symbol = stock_symbol.strip()
-            prev_periodo_inicial=buscador_previo(periodo_inicial, stock_symbol)
+            if valiadcion_accion_existente(stock_symbol):
+                    stock_symbol = stock_symbol.strip()
+                    prev_periodo_inicial=buscador_previo(periodo_inicial, stock_symbol)
+            else:
+                msj_error=str(f'La accion {stock_symbol} no se encontró')
+                return render_template('index.html', error_message=msj_error)
+                
+
+        stock_symbols.append("^MXX")
+
+        csv_filenames = []  # Lista para almacenar los nombres de archivo CSV generados
 
         for stock_symbol in stock_symbols:
             stock_symbol = stock_symbol.strip()
@@ -92,8 +92,11 @@ def download():
     csv_filename = request.args.get('csv_filename')
     historial = pd.read_csv(csv_filename)
 
+    # Eliminar la primera fila (excepto los encabezados)
+    historial = historial.iloc[1:]
+
     # Definir el nombre del archivo .xlsx para la conversión
-    xlsx_filename = csv_filename[:-4]+'.xlsx'	
+    xlsx_filename = csv_filename[:-4] + '.xlsx'	
 
     # Guardar el DataFrame en un archivo Excel (.xlsx)
     historial.to_excel(xlsx_filename, index=False)

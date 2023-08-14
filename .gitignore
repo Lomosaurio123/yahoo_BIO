@@ -9,8 +9,8 @@ __pycache__/
 .pytest_cache/
 
 Historial*.csv
+Historial*.xlsx
 portafolio1anio.xlsm
 tempCodeRunnerFile.py
 eliminar_duplicados.py
-Formateador_acciones.py
 prueba.py
