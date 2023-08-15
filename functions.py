@@ -44,7 +44,8 @@ def clean_keys(row):
     return cleaned_row
 
 def get_adj_close(csv_filename):
-    stock_symbol = csv_filename.split('_')[3]
+    stock_symbol = csv_filename.split('/')[2]
+    stock_symbol=stock_symbol.split('_')[3]
     adj_close_data = []
     with open(csv_filename, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -52,31 +53,6 @@ def get_adj_close(csv_filename):
             cleaned_row = clean_keys(row)
             adj_close_data.append({'date': row['Date'], 'adj_close': float(cleaned_row['Adj_Close'])})
     return stock_symbol, adj_close_data
-
-""" def generar_csv(data):
-    if not data:
-        return "Error: No se seleccionaron datos para la generación del CSV."
-
-    csv_data = {}
-    for item in data:
-        date, stock_symbol, adj_close = item.split(',')
-        if date not in csv_data:
-            csv_data[date] = {}
-        csv_data[date][stock_symbol] = adj_close
-
-    # Generar el archivo CSV en memoria
-    csv_buffer = io.StringIO()
-    fieldnames = ['Fecha'] + list(csv_data[data[0].split(',')[0]].keys())
-    writer = csv.writer(csv_buffer)
-    writer.writerow(fieldnames)
-
-    for date, adj_close_data in csv_data.items():
-        row_data = [date]
-        for stock_symbol in fieldnames[1:]:
-            row_data.append(adj_close_data.get(stock_symbol, ''))
-        writer.writerow(row_data)
-
-    return csv_buffer.getvalue()
 
 def calcular_matriz_correlacion(rendimientos_diarios):
     data_dict = {}
@@ -90,14 +66,13 @@ def calcular_matriz_correlacion(rendimientos_diarios):
     return matriz_correlacion
 
 
-
 def leer_csv(csv_filenames):
     all_adj_close_data = [] 
 
     for csv_filename in csv_filenames:
-        if os.path.exists(csv_filename):
-            stock_symbol, adj_close_data = get_adj_close(csv_filename)
-            print("Primer valor de adj_close_data:", adj_close_data[0])
+        ruta_csv = f'./Historial_accion_csv_xlsx/{csv_filename}'
+        if os.path.exists(ruta_csv):
+            stock_symbol, adj_close_data = get_adj_close(ruta_csv)
             all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
 
     return all_adj_close_data
@@ -115,4 +90,4 @@ def calcular_rendimientos_diarios(all_adj_close_data):
             result = ((previous_close / current_close) - 1) * 100
             rendimientos_diarios[stock_symbol].append(result)
 
-    return rendimientos_diarios """
+    return rendimientos_diarios

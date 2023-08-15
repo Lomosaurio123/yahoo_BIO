@@ -1,10 +1,8 @@
 import csv, requests, os, numpy as np, pandas as pd,json
-import io
-import xlsxwriter
-from io import BytesIO
-from flask import Flask, Response, render_template, request, send_file, jsonify, send_from_directory
+import pathlib
+from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-from functions import get_stock_history, clean_keys, get_adj_close, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion
+from functions import get_stock_history, clean_keys, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion
 
 app = Flask(__name__)
 
@@ -55,9 +53,14 @@ def index():
         stock_symbols = [symbol.upper() for symbol in stock_symbols]
 
         # Eliminar archivos generados anteriormente con nombre que comienza con 'Historial_accion_from_'
-        csv_files_to_delete = [file for file in os.listdir() if file.startswith('Historial_accion_from_')]
+        csv_files_to_delete = [file for file in os.listdir(pathlib.Path('Historial_accion_csv_xlsx')) if file.startswith('Historial_accion_from_')]
         for file_to_delete in csv_files_to_delete:
-            os.remove(file_to_delete)
+            os.remove(pathlib.Path('Historial_accion_csv_xlsx') / file_to_delete)
+
+        #Eliminamos archivos Prices.xlsx si es que existen
+        xlsx_files_to_delete = [f for f in os.listdir(pathlib.Path('Prices_xlsx')) if f.startswith('Precios')]
+        for f in xlsx_files_to_delete:
+            os.remove(pathlib.Path('Prices_xlsx') / f)
 
         stock_symbols.append("^MXX")
 
@@ -82,11 +85,12 @@ def index():
                 stock_symbol='IPC'
 
             csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
-            historial.to_csv(csv_filename, index=True, sep=',',encoding='utf-8')
+            ruta_csv = f'./Historial_accion_csv_xlsx/{csv_filename}'
+            historial.to_csv(ruta_csv, index=True, sep=',',encoding='utf-8')
 
             # Verificar si el archivo se creó correctamente
-            if os.path.exists(csv_filename):
-                csv_filenames.append(csv_filename)  # Agregar el nombre del archivo a la lista
+            #if os.path.exists(csv_filename):
+            csv_filenames.append(csv_filename)  # Agregar el nombre del archivo a la lista
 
         return render_template('result.html', csv_filenames=csv_filenames)
 
@@ -95,12 +99,12 @@ def index():
 @app.route('/display', methods=['GET'])
 def display():
     csv_filename = request.args.get('csv_filename')
+    ruta_csv = f'./Historial_accion_csv_xlsx/{csv_filename}'
 
-
-    if csv_filename and os.path.exists(csv_filename):
+    if csv_filename and os.path.exists(ruta_csv):
         # Leer el contenido del archivo CSV
         datos = []
-        with open(csv_filename, newline='') as csvfile:
+        with open(ruta_csv, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 cleaned_row = clean_keys(row)
@@ -196,13 +200,14 @@ def rendimientos():
 @app.route('/download', methods=['GET'])
 def download():
     csv_filename = request.args.get('csv_filename')
-    historial = pd.read_csv(csv_filename)
+    ruta_csv = f'./Historial_accion_csv_xlsx/{csv_filename}'
+    historial = pd.read_csv(ruta_csv)
 
     # Eliminar la primera fila (excepto los encabezados)
     historial = historial.iloc[1:]
 
     # Definir el nombre del archivo .xlsx para la conversión
-    xlsx_filename = csv_filename[:-4] + '.xlsx'	
+    xlsx_filename = ruta_csv[:-4] + '.xlsx'	
 
     # Guardar el DataFrame en un archivo Excel (.xlsx)
     historial.to_excel(xlsx_filename, index=False)
@@ -222,9 +227,10 @@ def download_tabla():
     
     df = pd.DataFrame(tableData)
     
-    df.to_excel("prices.xlsx",header=False, index=False)
+    ruta_archivo = './Prices_xlsx/Precios.xlsx'
+    df.to_excel(ruta_archivo,header=False, index=False)
 
-    return send_file("prices.xlsx", as_attachment=True)
+    return send_file(ruta_archivo, as_attachment=True)
 
 
 

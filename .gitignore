@@ -8,9 +8,11 @@ __pycache__/
 
 .pytest_cache/
 
-Historial*.csv
-Historial*.xlsx
+# Ignorar archivos en Historial_accion_csv_xlsx
+Historial_accion_csv_xlsx/*
+# Ignorar archivos en Prices_xlsx
+Prices_xlsx/*
+# Ignorar carpeta pycache
+__pycache__/ 
+# Ignorar archivo 
 portafolio1anio.xlsm
-tempCodeRunnerFile.py
-eliminar_duplicados.py
-prueba.py
