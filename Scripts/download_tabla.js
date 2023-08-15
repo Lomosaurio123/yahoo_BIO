@@ -12,7 +12,7 @@ $(document).ready(function () {
         });
 
         $.ajax({
-            type: 'POST',
+            type: 'post',
             url: '/download_tabla',
             data: { tableData: JSON.stringify(tableData) },
             success: function (response) {

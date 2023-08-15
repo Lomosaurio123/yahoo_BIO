@@ -53,7 +53,7 @@ def get_adj_close(csv_filename):
             adj_close_data.append({'date': row['Date'], 'adj_close': float(cleaned_row['Adj_Close'])})
     return stock_symbol, adj_close_data
 
-def generar_csv(data):
+""" def generar_csv(data):
     if not data:
         return "Error: No se seleccionaron datos para la generación del CSV."
 
@@ -115,4 +115,4 @@ def calcular_rendimientos_diarios(all_adj_close_data):
             result = ((previous_close / current_close) - 1) * 100
             rendimientos_diarios[stock_symbol].append(result)
 
-    return rendimientos_diarios
+    return rendimientos_diarios """

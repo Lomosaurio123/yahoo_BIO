@@ -51,7 +51,7 @@
             <button type="submit" class="btn btn-outline-success btn-sm" id="Tabla_datos">Descargar Tabla</button>
         </div>
     </form>
-    
+
 
     <div class="container mt-4">
         <table class="table table-bordered" id="datosTabla">
@@ -81,7 +81,7 @@
           {% endfor %}
         </table>
     </div>
-
+    <script src="{{ url_for('serve_script', filename='download_tabla.js') }}"> </script>
     <script>
         $(document).ready(function () {
             // Obtener todas las celdas con clases columna-*
@@ -128,7 +128,6 @@
             });
         });
      </script>
-     <script src="{{ url_for('serve_script', filename='download_tabla.js') }}"> </script>
 </body>
 
 </html>

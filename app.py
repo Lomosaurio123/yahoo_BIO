@@ -1,4 +1,5 @@
 import csv, requests, os, numpy as np, pandas as pd,json
+import io
 import xlsxwriter
 from io import BytesIO
 from flask import Flask, Response, render_template, request, send_file, jsonify, send_from_directory
@@ -58,6 +59,8 @@ def index():
         for file_to_delete in csv_files_to_delete:
             os.remove(file_to_delete)
 
+        stock_symbols.append("^MXX")
+
         #Validamos que existan las acciones
         for stock_symbol in stock_symbols:
             if valiadcion_accion_existente(stock_symbol):
@@ -66,10 +69,7 @@ def index():
             else:
                 msj_error=str(f'La accion {stock_symbol} no se encontró')
                 return render_template('index.html', error_message=msj_error)
-                
-
-        stock_symbols.append("^MXX")
-
+        
         csv_filenames = []  # Lista para almacenar los nombres de archivo CSV generados
 
         for stock_symbol in stock_symbols:
@@ -80,6 +80,7 @@ def index():
             # Guardar los datos en un archivo CSV
             if stock_symbol=='^MXX':
                 stock_symbol='IPC'
+
             csv_filename = f'Historial_accion_from_{stock_symbol}_{periodo_inicial.strftime("%Y-%m-%d")}_to_{periodo_final.strftime("%Y-%m-%d")}.csv'
             historial.to_csv(csv_filename, index=True, sep=',',encoding='utf-8')
 
@@ -214,27 +215,18 @@ def download():
 
 @app.route('/download_tabla', methods=['POST'])
 def download_tabla():
+    print("Entro a la funcion")
     tableData = request.form.get('tableData')
     tableData = json.loads(tableData)
     del tableData[1]
-    # Crear un archivo XLSX en memoria
-    output = BytesIO()
-    workbook = xlsxwriter.Workbook(output)
-    worksheet = workbook.add_worksheet()
     
+    df = pd.DataFrame(tableData)
     
-    for row_num, row in enumerate(tableData):
-        for col_num, cell_value in enumerate(row):
-            worksheet.write(row_num, col_num, cell_value)
-    workbook.close()
-    
-    output.seek(0)
+    df.to_excel("prices.xlsx",header=False, index=False)
 
-    # EL PROBLEMA ESTA AQUI
-    response = Response(output.read(), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response.headers["Content-Disposition"] = "attachment; filename=Precios.xlsx"
-    
-    return response
+    return send_file("prices.xlsx", as_attachment=True)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
