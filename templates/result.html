@@ -42,7 +42,9 @@
     </form>
 
     <form method="get" action="/matriz_correlacion">
-
+        {% for csv_filename in csv_filenames %}
+        <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+        {% endfor %}
         <button type="submit" class="btn btn-outline-primary btn-sm" value="matriz_correlacion">Matriz de
             correlación</button>
     </form>

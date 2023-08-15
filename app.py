@@ -3,7 +3,7 @@ import xlsxwriter
 from io import BytesIO
 from flask import Flask, Response, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-from functions import get_stock_history, clean_keys, get_adj_close, buscador_previo, valiadcion_accion_existente
+from functions import get_stock_history, clean_keys, get_adj_close, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion
 
 app = Flask(__name__)
 
@@ -114,44 +114,24 @@ def display():
 @app.route('/prices', methods=['GET'])
 def prices():
     csv_filenames = request.args.getlist('csv_filename')
-    all_adj_close_data = [] 
-
-    for csv_filename in csv_filenames:
-        if os.path.exists(csv_filename):
-            stock_symbol, adj_close_data = get_adj_close(csv_filename)
-            all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
-
+    all_adj_close_data = leer_csv(csv_filenames)
     return render_template('prices.html', data=all_adj_close_data)
 
 @app.route('/matriz_correlacion', methods=['GET'])
 def matriz_correlacion():
-
-
-    return render_template('matriz_correlacion.html')
+    csv_filenames = request.args.getlist('csv_filename')
+    all_adj_close_data = leer_csv(csv_filenames)
+    rendimientos_diarios = calcular_rendimientos_diarios(all_adj_close_data)
+    matriz_correlacion = calcular_matriz_correlacion(rendimientos_diarios)
+    print(matriz_correlacion)
+    return render_template('matriz_correlacion.html', matriz_correlacion=matriz_correlacion)
 
 @app.route('/rendimientos', methods=['GET'])
 def rendimientos():
     csv_filenames = request.args.getlist('csv_filename')
-    all_adj_close_data = [] 
-
-    for csv_filename in csv_filenames:
-        if os.path.exists(csv_filename):
-            stock_symbol, adj_close_data = get_adj_close(csv_filename)
-            all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
-
-    # Calcular los rendimientos diarios y guardarlos en un diccionario
-    rendimientos_diarios = {}
-    for data in all_adj_close_data:
-        stock_symbol = data['stock_symbol']
-        adj_close_data = data['adj_close_data']
-
-        rendimientos_diarios[stock_symbol] = []
-        for i in range(1, len(adj_close_data)):
-            previous_close = adj_close_data[i-1]['adj_close']
-            current_close = adj_close_data[i]['adj_close']
-            result = ((previous_close / current_close) - 1) * 100
-            rendimientos_diarios[stock_symbol].append(result)
-
+    
+    all_adj_close_data = leer_csv(csv_filenames)
+    rendimientos_diarios = calcular_rendimientos_diarios(all_adj_close_data)
 
     # Calcular la desviación estándar de cada acción
     desviacion_estandar = {}
@@ -207,8 +187,8 @@ def rendimientos():
     for stock_symbol, rendimientos in rendimientos_diarios.items():
         tlr[stock_symbol] = float(tasa)
         sharpes[stock_symbol]=((rendimientos_anuales[stock_symbol]/100)-(tlr[stock_symbol]/100))/desviacion_estandar[stock_symbol]
-
-    return render_template('rendimientos.html', data=all_adj_close_data, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, 
+    
+    return render_template('rendimientos.html', data=all_adj_close_data, diarios=rendimientos_diarios, desviacion_estandar=desviacion_estandar, rendimientos_anuales=rendimientos_anuales, 
                            coeficiente=Cof_var, beta=betas, sistematico=sistematico, no_sistematico=no_sistematico, tlr=tlr, sharpes=sharpes)
 
 
@@ -237,7 +217,6 @@ def download_tabla():
     tableData = request.form.get('tableData')
     tableData = json.loads(tableData)
     del tableData[1]
-    
     # Crear un archivo XLSX en memoria
     output = BytesIO()
     workbook = xlsxwriter.Workbook(output)

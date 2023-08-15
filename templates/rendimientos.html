@@ -123,34 +123,85 @@
     <div class="container mt-4">
         <table class="table table-bordered" id="datosTabla">
             <tr style="text-align: center;">
-                <th colspan="{{ data|length + 1 }}">Rendimiento diario</th>
-            </tr>
+
             <tr>
-                <th>Fecha</th>
                 {% for record in data %}
+                <th>Fecha</th>
                 <th>{{ record.stock_symbol }}</th>
                 {% endfor %}
             </tr>
 
-            {% for i in range(data[0].adj_close_data|length) %}
-            <tr {% if loop.first %}hidden{% endif %}>
-                <td>{{ data[0].adj_close_data[i].date }}</td>
-                {% for j in range(data|length) %}
-                {% if i == 0 %}
-                <td class="columna-{{ data[j].stock_symbol }}">0%</td>
+            {% set max_data_length = data|map(attribute='adj_close_data')|map('length')|max %}
+            {% set rendimientos = diarios %}
+            {% for i in range(max_data_length) %}
+            <tr>
+              {% for record in data %}
+                {% if i < record.adj_close_data|length %}
+                  <td>
+                    {% if i < rendimientos[record.stock_symbol]|length %}
+                        {{ record.adj_close_data[i+1].date }}
+                    {% endif %}
+                  </td>
+                  <td class="columna-{{ record.stock_symbol }}">
+                    {% if rendimientos[record.stock_symbol][i] %}
+                      {{ '%.4f' % rendimientos[record.stock_symbol][i] }}%
+                    {% endif %}
+                  </td>
+
                 {% else %}
-                {% set previous_close = data[j].adj_close_data[i-1].adj_close %}
-                {% set current_close = data[j].adj_close_data[i].adj_close %}
-                {% set result = ((previous_close / current_close) - 1) * 100 %}
-                <td class="columna-{{ data[j].stock_symbol }}">{{ '%.4f' % result }}%</td>
+                  <td></td>
+                  <td></td>
                 {% endif %}
-                {% endfor %}
+              {% endfor %}
             </tr>
-            {% endfor %}
+          {% endfor %}
         </table>
-
-        <script src="{{ url_for('serve_script', filename='rendimientos.js') }}"> </script>
     </div>
+    <script>
+        $(document).ready(function () {
+            // Obtener todas las celdas con clases columna-*
+            var cellsWithClasses = document.querySelectorAll('td[class^="columna-"]');
+            
+            // Iterar a través de las celdas y analizar los valores
+            cellsWithClasses.forEach(function(cell) {
+                var cellContent = cell.textContent.trim();
+                var numeroActual = parseFloat(cellContent);
+                
+                if (!isNaN(numeroActual)) {
+                    // Obtener la clase específica de la celda (por ejemplo, columna-XYZ)
+                    var specificClass = cell.className.match(/columna-[A-Za-z0-9]+/);
+                    
+                    if (specificClass) {
+                        specificClass = specificClass[0];
+                        var selector = "." + specificClass;
+                        
+                        // Obtener todas las celdas en la misma columna
+                        var cellsInColumn = document.querySelectorAll(selector);
+                        
+                        // Inicializar el valor anterior como vacío
+                        var numeroAnterior = "";
+                        
+                        // Iterar a través de las celdas en la misma columna y aplicar lógica de colores
+                        cellsInColumn.forEach(function(colCell) {
+                            var colCellContent = colCell.textContent.trim();
+                            var colNumeroActual = parseFloat(colCellContent);
+                            
+                            if (!isNaN(colNumeroActual)) {
+                                if (colNumeroActual > numeroAnterior) {
+                                    $(colCell).addClass("color-verde");
+                                } else if (colNumeroActual < numeroAnterior) {
+                                    $(colCell).addClass("color-rojo");
+                                } else if (colNumeroActual === numeroAnterior) {
+                                    $(colCell).addClass("color-azul");
+                                }
+                                
+                                numeroAnterior = colNumeroActual;
+                            }
+                        });
+                    }
+                }
+            });
+        });
+     </script>
 </body>
-
 </html>

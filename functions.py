@@ -1,4 +1,6 @@
+import os
 import yfinance as yf,csv, io, datetime
+import pandas as pd
 
 def valiadcion_accion_existente(stock_symbol):
     #Verificamos que las acciones ingresadas existan
@@ -75,3 +77,42 @@ def generar_csv(data):
         writer.writerow(row_data)
 
     return csv_buffer.getvalue()
+
+def calcular_matriz_correlacion(rendimientos_diarios):
+    data_dict = {}
+    min_length = min([len(rendimientos) for rendimientos in rendimientos_diarios.values()])  # Encuentra la longitud mínima
+
+    for stock_symbol, rendimientos in rendimientos_diarios.items():
+        data_dict[stock_symbol] = rendimientos[:min_length]  # Limita los rendimientos a la longitud mínima
+
+    df_rendimientos = pd.DataFrame(data_dict)
+    matriz_correlacion = df_rendimientos.corr()
+    return matriz_correlacion
+
+
+
+def leer_csv(csv_filenames):
+    all_adj_close_data = [] 
+
+    for csv_filename in csv_filenames:
+        if os.path.exists(csv_filename):
+            stock_symbol, adj_close_data = get_adj_close(csv_filename)
+            print("Primer valor de adj_close_data:", adj_close_data[0])
+            all_adj_close_data.append({'stock_symbol': stock_symbol, 'adj_close_data': adj_close_data})
+
+    return all_adj_close_data
+
+def calcular_rendimientos_diarios(all_adj_close_data):
+    rendimientos_diarios = {}
+    for data in all_adj_close_data:
+        stock_symbol = data['stock_symbol']
+        adj_close_data = data['adj_close_data']
+
+        rendimientos_diarios[stock_symbol] = []
+        for i in range(1, len(adj_close_data)):
+            previous_close = adj_close_data[i-1]['adj_close']
+            current_close = adj_close_data[i]['adj_close']
+            result = ((previous_close / current_close) - 1) * 100
+            rendimientos_diarios[stock_symbol].append(result)
+
+    return rendimientos_diarios
