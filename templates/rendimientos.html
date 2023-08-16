@@ -44,13 +44,14 @@
         </div>
     </nav>
 
-    <form id="csvForm" method="post" action="/download_csv">
-        <input type="hidden" name="nombre_csv" value="Rendimientos.csv">
-        <div class="d-flex justify-content-between">
-            <h3>Rendimientos</h3>
-            <input type="button" class="btn btn-outline-success btn-sm" value="Generar CSV" id="GenerarCSV">
-        </div>
-    </form>
+    <div class="d-flex justify-content-between">
+        <h3>rendimientos</h3>
+        <form method="get" action="/download_file">
+            <input type="hidden" name="ruta" value="./Rendimientos_xslx/Rendimientos.xlsx">
+            <input type="hidden" name="Opcion" value=2>
+            <button type="hidden" class="btn btn-outline-success btn-sm">Descargar Precios</button>
+        </form>
+    </div>
 
 
     <div class="container mt-4">
@@ -157,6 +158,9 @@
           {% endfor %}
         </table>
     </div>
+
+    <script src="{{ url_for('serve_script', filename='download_tabla.js') }}"></script>
+
     <script>
         $(document).ready(function () {
             // Obtener todas las celdas con clases columna-*

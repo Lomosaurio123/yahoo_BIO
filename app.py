@@ -1,7 +1,7 @@
 import csv, requests, os, numpy as np, pandas as pd, json, pathlib
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
-from functions import get_stock_history, clean_keys, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion
+from functions import get_stock_history, clean_keys, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion, verificacion_crear_archivo
 
 app = Flask(__name__)
 
@@ -251,17 +251,35 @@ def download_prices():
 def download_tabla():
     try:
         tableData = request.get_json()
-        tableData['headers']=tableData['headers'][:-1]
-        tableData['data']= tableData['data'][2:]
+        opcion=int(tableData['Opcion'])
 
-        df = pd.DataFrame(tableData['data'], columns=tableData['headers'])
-        ruta_archivo = './Prices_xlsx/Precios.xlsx'
-        df.to_excel(ruta_archivo, header=True, index=False)
+        if 'Opcion' in tableData:
+            del tableData['Opcion']
+        
+        if opcion==1:
+            tableData['headers']=tableData['headers'][:-1]
+            tableData['data']= tableData['data'][2:]
+            
+            df = pd.DataFrame(tableData['data'], columns=tableData['headers'])
+            ruta_archivo = './Prices_xlsx/Precios.xlsx'
+            
+            df.to_excel(ruta_archivo, header=True, index=False)
+            
+            return verificacion_crear_archivo(ruta_archivo)
+        
+        elif opcion==2:
+            cleaned_data = [[value.strip() for value in sublist] for sublist in tableData['data']]
+            cleaned_data=cleaned_data[1:-1]
+            tableData['data'] = cleaned_data
+            tableData['headers']=tableData['headers'][:-1]
+            
+            df = pd.DataFrame(tableData['data'], columns=tableData['headers'])
+            ruta_archivo = './Rendimientos_xslx/Rendimientos.xlsx'
+            
+            df.to_excel(ruta_archivo, header=True, index=False)
+            
+            return 'ok'
 
-        if ruta_archivo:
-            return "OK", 200
-        else:
-            return "Error archivo no encontrado"
         
     except Exception as e:
         print(e)

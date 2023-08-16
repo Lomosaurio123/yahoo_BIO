@@ -12,6 +12,8 @@ __pycache__/
 Historial_accion_csv_xlsx/*
 # Ignorar archivos en Prices_xlsx
 Prices_xlsx/*
+# Ignorar archivos en Rendimientos_xlsx
+Rendimientos_xslx/*
 # Ignorar carpeta pycache
 __pycache__/ 
 # Ignorar archivo 

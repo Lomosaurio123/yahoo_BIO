@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Obtener el valor de Opcion del formulario
+    const opcionInput = document.querySelector('input[name="Opcion"]');
+    const opcionValue = opcionInput ? opcionInput.value : '';
+
     // Obtener los encabezados de la tabla
     const headers = [];
     const headerCells = document.querySelectorAll('#datosTabla th');
@@ -9,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener los datos de la tabla
     const data = [];
     const stockSymbols = new Set();
-    
+
     const tableRows = document.querySelectorAll('#datosTabla tr:not(:first-child)');
     tableRows.forEach(row => {
         const rowData = [];
-        
+
         // Obtener las celdas de datos para esta fila
         const dataCells = row.querySelectorAll('td');
         dataCells.forEach(cell => {
@@ -23,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obtener el símbolo de stock asociado a las celdas de datos
         const stockSymbol = row.getAttribute('data-stock-symbol');
         stockSymbols.add(stockSymbol);
-        
+
         data.push(rowData);
     });
 
@@ -35,7 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Enviar los datos al backend
     const tableData = {
         headers: headers,
-        data: data
+        data: data,
+        Opcion: opcionValue  // Usar el valor de Opcion obtenido del formulario
     };
 
     fetch('/download_tabla', {
@@ -46,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         body: JSON.stringify(tableData)
     })
         .then(response => {
-            console.log('Se envio la tabla:');
+            console.log('Se envió la tabla:');
         })
         .catch(error => {
             console.error('Error:', error);

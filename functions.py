@@ -91,3 +91,9 @@ def calcular_rendimientos_diarios(all_adj_close_data):
             rendimientos_diarios[stock_symbol].append(result)
 
     return rendimientos_diarios
+
+def verificacion_crear_archivo(ruta_archivo):
+    if ruta_archivo:
+        return "OK", 200
+    else:
+        return "Error archivo no encontrado"
