@@ -278,7 +278,7 @@ def download_tabla():
             
             df.to_excel(ruta_archivo, header=True, index=False)
             
-            return 'ok'
+            return verificacion_crear_archivo(ruta_archivo)
 
         
     except Exception as e:
