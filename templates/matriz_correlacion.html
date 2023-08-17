@@ -18,11 +18,37 @@
         </div>
     </nav>
 
+    <div class="position-relative">
+        <form method="get" action="/download_file">
+            <input type="hidden" name="ruta" value="./MatrizCorrelacion_xlsx/MatrizCorrelacion.xlsx">
+            <input type="hidden" name="Opcion" value="3">
+            <button type="submit" class="btn btn-outline-success btn-sm position-absolute top-0 end-0">Descargar Matriz de Correlacion</button>
+        </form>
+    </div>
 
+    <div class="container mt-4">
+        <h3>Matriz de Correlación</h3>
+        <table class="table table-bordered" id="datosTabla">
+                <tr>
+                    <th></th>
+                    {% for stock_symbol in matriz_correlacion.columns if stock_symbol != 'IPC' %}
+                    <th>{{ stock_symbol }}</th>
+                    {% endfor %}
+                </tr>
+                {% for stock_symbol, row in matriz_correlacion.iterrows() %}
+                {% if stock_symbol != 'IPC' %}
+                <tr>
+                    <td>{{ stock_symbol }}</td>
+                    {% for column, value in row.items() if column != 'IPC' %}
+                    <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+        </table>
+    </div>
 
-
-
-
-    
+    <script src="{{ url_for('serve_script', filename='download_tabla.js') }}"></script>
+        
 </body>
 </html>

@@ -9,12 +9,11 @@ __pycache__/
 .pytest_cache/
 
 # Ignorar archivos en Historial_accion_csv_xlsx
-Historial_accion_csv_xlsx/*
+Historial_accion_csv_xlsx/
 # Ignorar archivos en Prices_xlsx
-Prices_xlsx/*
+Prices_xlsx/
 # Ignorar archivos en Rendimientos_xlsx
-Rendimientos_xslx/*
-# Ignorar carpeta pycache
-__pycache__/ 
+Rendimientos_xslx/
 # Ignorar archivo 
 portafolio1anio.xlsm
+MatrizCorrelacion_xlsx/

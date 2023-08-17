@@ -280,6 +280,20 @@ def download_tabla():
             
             return verificacion_crear_archivo(ruta_archivo)
 
+        elif opcion == 3:
+            headers=tableData['headers'][:-1]
+            data=tableData['data']
+            #print(headers,data)
+
+            df = pd.DataFrame(data, columns=headers)
+            ruta_archivo = './MatrizCorrelacion_xlsx/MatrizCorrelacion.xlsx'
+
+            df.to_excel(ruta_archivo, header=True, index=False)
+            
+            return verificacion_crear_archivo(ruta_archivo)
+        else:
+            return "Opción no válida"
+
         
     except Exception as e:
         print(e)
