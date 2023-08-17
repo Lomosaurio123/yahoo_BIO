@@ -1,4 +1,5 @@
 import csv, requests, os, numpy as np, pandas as pd, json, pathlib
+from matplotlib import pyplot as plt
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 from datetime import datetime
 from functions import get_stock_history, clean_keys, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion, verificacion_crear_archivo
@@ -144,7 +145,6 @@ def matriz_correlacion():
     all_adj_close_data = leer_csv(csv_filenames)
     rendimientos_diarios = calcular_rendimientos_diarios(all_adj_close_data)
     matriz_correlacion = calcular_matriz_correlacion(rendimientos_diarios)
-    print(matriz_correlacion)
     return render_template('matriz_correlacion.html', matriz_correlacion=matriz_correlacion)
 
 
@@ -283,13 +283,38 @@ def download_tabla():
         elif opcion == 3:
             headers=tableData['headers'][:-1]
             data=tableData['data']
-            #print(headers,data)
 
             df = pd.DataFrame(data, columns=headers)
             ruta_archivo = './MatrizCorrelacion_xlsx/MatrizCorrelacion.xlsx'
 
             df.to_excel(ruta_archivo, header=True, index=False)
+
+            #MAPA DE COLOR
+            data = np.array(data)
+            data = data[:,1:].astype(float)
+
+            # Crear la figura y el eje
+            fig, ax = plt.subplots()
+           
+            # Crear el mapa de calor
+            heatmap = ax.imshow(data, cmap=plt.cm.RdYlBu_r, vmin=-1, vmax=1)  # Ajusta los límites de vmin y vmax según tus necesidades
+
+            # Agregar barra de colores
+            cbar = plt.colorbar(heatmap)
             
+            # Definir etiquetas de los ejes
+            tick_labels = headers[1:]
+            ax.set_xticks(np.arange(len(tick_labels)))
+            ax.set_yticks(np.arange(len(tick_labels)))
+            ax.set_xticklabels(tick_labels)
+            ax.set_yticklabels(tick_labels)
+
+            # Rotar las etiquetas y ajustar la posición
+            plt.setp(ax.get_xticklabels(), rotation=90, ha="right", rotation_mode="anchor")
+
+            # Mostrar el mapa de calor
+            plt.show()
+
             return verificacion_crear_archivo(ruta_archivo)
         else:
             return "Opción no válida"

@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function () {
     })
         .then(response => {
             console.log('Se envió la tabla:');
-            console.log(tableData);
         })
         .catch(error => {
             console.error('Error:', error);
