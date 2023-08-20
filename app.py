@@ -1,6 +1,7 @@
 import csv, requests, os, numpy as np, pandas as pd, json, pathlib
+import time
 from matplotlib import pyplot as plt
-from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
+from flask import Flask, render_template, request, send_file, jsonify, send_from_directory, url_for
 from datetime import datetime
 from functions import get_stock_history, clean_keys, buscador_previo, valiadcion_accion_existente, leer_csv, calcular_rendimientos_diarios, calcular_matriz_correlacion, verificacion_crear_archivo
 
@@ -13,7 +14,6 @@ app = Flask(__name__)
 def serve_static(filename):
     root_dir = os.path.dirname(os.getcwd())
     return send_from_directory(os.path.join(root_dir, 'Static'), filename)
-
 
 @app.route('/scripts/<path:filename>')
 def serve_script(filename):
@@ -72,6 +72,12 @@ def index():
             pathlib.Path('Prices_xlsx')) if f.startswith('Precios')]
         for f in xlsx_files_to_delete:
             os.remove(pathlib.Path('Prices_xlsx') / f)
+
+        # Eliminar mapas de calor si es que existen
+        map_calor = [f for f in os.listdir(
+            pathlib.Path('Static')) if f.startswith('Mapa de calor.png')]
+        for f in map_calor:
+            os.remove(pathlib.Path('Static') / f)
 
         stock_symbols.append("^MXX")
 
@@ -247,6 +253,20 @@ def download_prices():
     else:
         return "Error archivo no encontrado"
 
+@app.route('/cargar_mapa_calor')
+def cargar_mapa_calor():
+  filename = 'Mapa de calor.png'
+
+  ruta_archivo = os.path.join(app.static_folder, filename)
+  
+  while not os.path.exists(ruta_archivo):
+    # esperar un poco antes de volver a verificar
+    time.sleep(0.3) 
+
+  url = url_for('serve_static', filename=filename)
+
+  return url
+
 @app.route('/download_tabla', methods=['POST'])
 def download_tabla():
     try:
@@ -312,16 +332,25 @@ def download_tabla():
             # Rotar las etiquetas y ajustar la posición
             plt.setp(ax.get_xticklabels(), rotation=90, ha="right", rotation_mode="anchor")
 
-            # Mostrar el mapa de calor
-            plt.show()
+            ruta_img_map_color='./Static/Mapa de calor.png'
 
-            return verificacion_crear_archivo(ruta_archivo)
+            # Guardamos el mapa de color
+            plt.savefig(ruta_img_map_color)
+            
+
+            if verificacion_crear_archivo(ruta_archivo):
+                return "Mapa de calor generado"
+            else:
+                return "Archivo no generado"
+            
         else:
             return "Opción no válida"
 
         
     except Exception as e:
         print(e)
+    
+    return "Error en la vista"
 
 if __name__ == '__main__':
     app.run(debug=True)
